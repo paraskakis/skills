@@ -26,7 +26,7 @@ If any file is missing, ask the user to provide it before proceeding.
 
 A complete set of input files and output is available at [`paraskakis/apidesign/conference`](https://github.com/paraskakis/apidesign/tree/main/conference):
 
-- `conference-api-stories.md` — Stories (heading: `# Conference Schedule API: User Stories`)
+- `conference-api-stories.md` — Stories (heading: `# Conference Schedule API — User Stories`)
 - `conference-domain.md` — Domain (heading: `# Conference Domain`)
 - `API-standards.md` — Standards (heading: `# API Standards`)
 - `OpenAPI-best-practices.md` — Best practices (heading: `# OpenAPI Best Practices for LLMs`)
