@@ -5,7 +5,7 @@ description: Generate an OpenAPI 3.1.0 specification from API design stories, a 
 
 # Design API Spec
 
-Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and an OpenAPI best practices file. Then lint it with RateMyOpenAPI and fix issues. This is the second skill in Emmanuel Paraskakis's two-skill chain for designing APIs with LLMs — use `design-api-stories` first to generate the stories, then this skill to generate the spec.
+Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and an OpenAPI best practices file. Then lint it with RateMyOpenAPI and fix issues. This is part of Emmanuel Paraskakis's method for designing APIs with LLMs. Stories can come from the companion `design-api-stories` skill or be written by hand — either way, this skill takes stories + domain + standards + OpenAPI best practices and produces a validated spec.
 
 ## When to Use
 
