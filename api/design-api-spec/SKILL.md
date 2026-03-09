@@ -13,12 +13,12 @@ Use when the user says `/design-api-spec` or asks to generate an OpenAPI spec fr
 
 ## Inputs
 
-The user must provide (or point to) these files:
+The user must provide (or point to) these files. Files can be named anything — identify each file by its `# Title` heading or content, not by filename.
 
-1. **Stories** — Output from `/design-api-stories`. Defines methods, resources, parameters, and themes.
-2. **Domain** — Data objects, properties, enums, object relations. Source of truth for schemas.
-3. **API Standards** — Style guide, naming, paths, security, error handling. Source of truth for conventions.
-4. **OpenAPI Best Practices** — Formatting rules, DRY principles, SDK compatibility, component structure. Source of truth for OpenAPI document quality.
+1. **Stories** — Output from `/design-api-stories`. Defines methods, resources, parameters, and themes. Look for a heading like `# Stories`, `# User Stories`, or similar.
+2. **Domain** — Data objects, properties, enums, object relations. Source of truth for schemas. Look for a heading like `# Domain`, `# Domain Model`, or similar.
+3. **API Standards** — Style guide, naming, paths, security, error handling. Source of truth for conventions. Look for a heading like `# API Standards`, `# Style Guide`, or similar.
+4. **OpenAPI Best Practices** — Formatting rules, DRY principles, SDK compatibility, component structure. Source of truth for OpenAPI document quality. Look for a heading like `# OpenAPI Best Practices`, `# OAS Best Practices`, or similar.
 
 If any file is missing, ask the user to provide it before proceeding.
 
@@ -89,10 +89,9 @@ Before writing the file:
 
 ## Step 4: Save the File
 
-Save as JSON to a location the user specifies, or suggest a default:
-- `[domain]-openapi.json`
+Save as JSON to a location the user specifies, or ask where they'd like it saved. No specific naming convention required.
 
-**Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number (e.g., `[domain]-openapi-2.json`) and try again.
+**Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number and try again.
 
 ## Step 5: Lint with RateMyOpenAPI
 
