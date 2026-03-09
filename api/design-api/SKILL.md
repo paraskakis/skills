@@ -186,12 +186,16 @@ Save as JSON to a location the user specifies, or ask where they'd like it saved
 
 **Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number and try again.
 
-## Step 9: Lint with RateMyOpenAPI
+## Step 9: Lint with RateMyOpenAPI (optional)
 
-Upload the spec and get scores + full issue list in one API call:
+This step requires an API key from [RateMyOpenAPI](https://ratemyopenapi.com). Sign up for a free account, then find your API key in your dashboard. Set it as the environment variable `RMOA_API_KEY`.
+
+**If `RMOA_API_KEY` is not set**, tell the user: "No RMOA API key found. Skipping automated linting. You can get a free key at ratemyopenapi.com and set `RMOA_API_KEY` to enable it." Then skip to Step 10.
+
+**If `RMOA_API_KEY` is set**, upload the spec and get scores + full issue list:
 
 ```bash
-source ~/.zshrc && curl -s -X POST \
+curl -s -X POST \
   -H "Authorization: Bearer $RMOA_API_KEY" \
   -F "apiFile=@[/absolute/path/to/spec.json]" \
   "https://api.ratemyopenapi.com/sync-report" | python3 -c "
@@ -215,7 +219,7 @@ Use the issue list to drive all fixes below.
 
 ### Interpreting Results
 
-The tool scores four categories (0-100 each):
+Scores four categories (0-100 each):
 - **Docs** — Descriptions, summaries, examples
 - **Completeness** — Required fields, response codes, schemas
 - **SDK Generation** — operationIds, no inline schemas, proper refs
