@@ -11,6 +11,16 @@ Generate an OpenAPI 3.1.0 specification from API design stories, a domain model,
 
 Use when the user says `/design-api-spec` or asks to generate an OpenAPI spec from stories.
 
+## Optional Dependencies
+
+The core skill (spec generation) works with no extra tools. For the full experience:
+
+- **RateMyOpenAPI API key** — enables automated linting and scoring. Free signup at [api.ratemyopenapi.com/docs](https://api.ratemyopenapi.com/docs). Set as `RMOA_API_KEY` env var.
+- **Node.js** — enables local Swagger UI preview via `npx http-server`.
+- **curl + python3** — used for the RMOA API call. Almost always pre-installed.
+
+Without these, the skill still generates a complete OpenAPI spec — it just skips linting and local preview.
+
 ## Inputs
 
 The user must provide (or point to) these files. Files can be named anything — identify each file by its `# Title` heading or content, not by filename.
@@ -97,12 +107,16 @@ Save as JSON to a location the user specifies, or ask where they'd like it saved
 
 **Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number and try again.
 
-## Step 5: Lint with RateMyOpenAPI
+## Step 5: Lint with RateMyOpenAPI (optional)
 
-Upload the spec and get scores + full issue list in one API call:
+This step requires an API key from [RateMyOpenAPI](https://ratemyopenapi.com). Sign up for a free account at [api.ratemyopenapi.com/docs](https://api.ratemyopenapi.com/docs) — your API key appears in the Authentication section once logged in. Set it as the environment variable `RMOA_API_KEY` (or any name you prefer — just update the curl command below to match).
+
+**If `RMOA_API_KEY` is not set**, try sourcing the user's shell profile first (`source ~/.zshrc`, `source ~/.bashrc`, or equivalent) — the key may be defined there but not yet loaded in the current session. If still not set, tell the user: "No RMOA API key found. Skipping automated linting. You can get a free key at ratemyopenapi.com and set `RMOA_API_KEY` to enable it." Then skip to Step 6.
+
+**If `RMOA_API_KEY` is set**, upload the spec and get scores + full issue list:
 
 ```bash
-source ~/.zshrc && curl -s -X POST \
+curl -s -X POST \
   -H "Authorization: Bearer $RMOA_API_KEY" \
   -F "apiFile=@[/absolute/path/to/spec.json]" \
   "https://api.ratemyopenapi.com/sync-report" | python3 -c "
@@ -122,13 +136,11 @@ for i, issue in enumerate(issues, 1):
 "
 ```
 
-The response contains everything needed: scores, `reportUrl`, and the full `issues` array (code, message, path, severity). No second API call required.
-
 Use the issue list to drive all fixes below.
 
 ### Interpreting Results
 
-The tool scores four categories (0-100 each):
+Scores four categories (0-100 each):
 - **Docs** — Descriptions, summaries, examples
 - **Completeness** — Required fields, response codes, schemas
 - **SDK Generation** — operationIds, no inline schemas, proper refs
@@ -148,6 +160,14 @@ The tool scores four categories (0-100 each):
 3. **Re-run after fixes.** Keep iterating until either:
    - Score is 100/100, or
    - Remaining issues are intentional design choices the user has approved ignoring
+
+### Common Gotchas
+
+- **No-auth APIs score ~65 on Security.** RMOA flags 8+ warnings about missing 401/403. If the API intentionally has no auth, these are expected — confirm with the user and move on.
+- **`nullable` keyword.** OpenAPI 3.1.0 dropped `nullable`. Use `"type": ["string", "null"]` instead. RMOA will flag this.
+- **Missing descriptions/examples.** The most common deductions. Every operation, parameter, schema property, and response needs both. Don't skip headers either.
+- **Orphaned components.** RMOA flags schemas defined in `components` but never `$ref`'d. Remove them or wire them up.
+- **Inline schemas.** Any schema defined directly in a path (not via `$ref`) hurts the SDK Generation score. Extract to `components/schemas`.
 
 ## Step 6: Report
 
@@ -171,7 +191,9 @@ Show the user:
 
 Then ask: **"Want to preview this in Swagger UI?"**
 
-If yes, create a `swagger-preview.html` file in the same directory as the spec:
+Requires Node.js (for `npx http-server`) and internet access (Swagger UI loads from unpkg.com CDN). If Node is not installed, tell the user: "Swagger UI preview requires Node.js. You can paste the spec into https://editor.swagger.io to preview it there instead." Then skip the preview.
+
+If yes and Node is available, create a `swagger-preview.html` file in the same directory as the spec:
 
 ```html
 <!DOCTYPE html>
