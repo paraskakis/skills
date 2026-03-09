@@ -13,11 +13,11 @@ Use when the user says `/design-api-stories` or asks to generate API user storie
 
 ## Inputs
 
-The user must provide three files (or paste their content):
+The user must provide three files (or paste their content). Files can be named anything — identify each file by its `# Title` heading or content, not by filename.
 
-1. **Requirements** — ICP, needs, pain points, use cases, benefits. The "why" and "what."
-2. **Domain** — Data objects, properties, enums, object relations. The "nouns."
-3. **API Standards** — Style guide, naming conventions, path rules, security, error handling. The "how."
+1. **Requirements** — ICP, needs, pain points, use cases, benefits. The "why" and "what." Look for a heading like `# Requirements`, `# Research`, or similar.
+2. **Domain** — Data objects, properties, enums, object relations. The "nouns." Look for a heading like `# Domain`, `# Domain Model`, or similar.
+3. **API Standards** — Style guide, naming conventions, path rules, security, error handling. The "how." Look for a heading like `# API Standards`, `# Style Guide`, or similar.
 
 If any file is missing, ask the user to provide it before proceeding.
 
@@ -89,10 +89,9 @@ Exception: if the user explicitly asks for step-by-step review, pause after each
 
 ## Step 5: Save
 
-Save the completed stories to a file the user specifies, or suggest a default name based on the domain:
-- `[domain]-stories.md`
+Save the completed stories to a file the user specifies, or ask where they'd like it saved. No specific naming convention required.
 
-**Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number (e.g., `[domain]-stories-2.md`) and try again.
+**Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number and try again.
 
 ## Key Principles
 
