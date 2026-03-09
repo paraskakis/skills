@@ -1,11 +1,11 @@
 ---
 name: design-api-stories
-description: Generate API design stories from requirements, a domain model, and API standards. Stories bridge product requirements and OpenAPI specs — Emmanuel's method for designing APIs with LLMs. Use when user says "/design-api-stories" or asks to generate API user stories.
+description: Generate API design stories from requirements, a domain model, and API standards. Stories bridge product requirements and OpenAPI specs — Emmanuel Paraskakis's method for designing APIs with LLMs. Use when user says "/design-api-stories" or asks to generate API user stories.
 ---
 
 # Design API Stories
 
-Generate API design stories from requirements, a domain model, and API standards. This is Emmanuel's method for designing APIs with LLMs — the stories become the bridge between product requirements and an OpenAPI specification.
+Generate API design stories from requirements, a domain model, and API standards. This is Emmanuel Paraskakis's method for designing APIs with LLMs — the stories become the bridge between product requirements and an OpenAPI specification.
 
 ## When to Use
 
