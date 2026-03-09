@@ -112,10 +112,12 @@ Present all stories in a single pass, then ask:
 **"Here are the stories. Any changes before I generate the spec, or good to go?"**
 
 - If the user has changes → incorporate them, re-present, and ask again.
-- If the user says go → save the final stories and proceed to Phase 2.
+- If the user says go → save the final stories to file **immediately** (in its own response, before any spec generation thinking), then proceed to Phase 2.
 - If the user passes `--no-pause` → skip the checkpoint and proceed directly.
 
 **Important:** Always save the final, reviewed stories to a file before generating the spec. The saved stories are the source of truth for Phase 2 — the spec must reflect any changes the user made during review.
+
+**Save stories FIRST, spec SECOND — in separate responses.** When the user approves the stories, write them to file immediately in a standalone tool call. Do not batch the stories save with the spec generation — the spec requires significant reasoning time, and bundling them delays the stories save unnecessarily. Saving stories first shows progress to the user and gives them a checkpoint in case spec generation fails.
 
 Save stories to a file the user specifies, or ask where they'd like them saved.
 
