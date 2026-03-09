@@ -7,9 +7,7 @@ description: Design an API end-to-end — from requirements to a validated OpenA
 
 Design an API end-to-end: requirements → stories → OpenAPI spec → lint → iterate. This is Emmanuel Paraskakis's method for designing APIs with LLMs.
 
-Two entry points depending on what you have:
-- **From requirements:** provide requirements + domain + standards + OpenAPI best practices → stories are generated first, reviewed, then the spec.
-- **From stories:** provide stories + domain + standards + OpenAPI best practices → skip straight to spec generation.
+All four foundation files (requirements, domain, standards, OpenAPI best practices) are always required. Stories are optional — if provided, they represent the human's design decisions and the skill skips straight to spec generation. If not, the skill generates stories first and pauses for review.
 
 ## When to Use
 
@@ -20,13 +18,13 @@ Use when the user says `/design-api` or asks to design an API from requirements 
 The user must provide (or point to) these files. Files can be named anything — identify each file by its `# Title` heading or content, not by filename.
 
 **Always required:**
-1. **Domain** — Data objects, properties, enums, object relations. Source of truth for schemas. Look for a heading like `# Domain`, `# Domain Model`, or similar.
-2. **API Standards** — Style guide, naming, paths, security, error handling. Source of truth for conventions. Look for a heading like `# API Standards`, `# Style Guide`, or similar.
-3. **OpenAPI Best Practices** — Formatting rules, DRY principles, SDK compatibility, component structure. Source of truth for OpenAPI document quality. Look for a heading like `# OpenAPI Best Practices`, `# OAS Best Practices`, or similar.
+1. **Requirements** — ICP, needs, pain points, use cases, benefits. The "why" and "what." Look for a heading like `# Requirements`, `# Research`, or similar.
+2. **Domain** — Data objects, properties, enums, object relations. Source of truth for schemas. Look for a heading like `# Domain`, `# Domain Model`, or similar.
+3. **API Standards** — Style guide, naming, paths, security, error handling. Source of truth for conventions. Look for a heading like `# API Standards`, `# Style Guide`, or similar.
+4. **OpenAPI Best Practices** — Formatting rules, DRY principles, SDK compatibility, component structure. Source of truth for OpenAPI document quality. Look for a heading like `# OpenAPI Best Practices`, `# OAS Best Practices`, or similar.
 
-**One of these (determines entry point):**
-4a. **Requirements** — ICP, needs, pain points, use cases, benefits. Look for a heading like `# Requirements`, `# Research`, or similar. → Starts at Phase 1 (stories).
-4b. **Stories** — API user stories with methods, resources, parameters. Look for a heading like `# Stories`, `# User Stories`, or similar. → Skips to Phase 2 (spec).
+**Optional (determines entry point):**
+5. **Stories** — API user stories with methods, resources, parameters. The human's design decisions — resource nesting, endpoint grouping, parameter choices. Look for a heading like `# Stories`, `# User Stories`, or similar. If provided → skip to Phase 2 (spec). If not → Phase 1 generates them for review.
 
 If any required file is missing, ask the user to provide it before proceeding.
 
