@@ -63,7 +63,7 @@ Add `-g` for global (user-level, available in all projects):
 npx skills add paraskakis/skills/api -a claude-code -g
 ```
 
-### Manual install (Claude Code)
+## Manual install (Claude Code)
 
 **Project-scoped** (committed with your code):
 
