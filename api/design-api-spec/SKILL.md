@@ -117,15 +117,27 @@ This step requires an API key from [RateMyOpenAPI](https://ratemyopenapi.com). S
 
 **If `RMOA_API_KEY` is not set**, try sourcing the user's shell profile first (`source ~/.zshrc`, `source ~/.bashrc`, or equivalent) — the key may be defined there but not yet loaded in the current session. If still not set, tell the user: "No RMOA API key found. Skipping automated linting. You can get a free key at ratemyopenapi.com and set `RMOA_API_KEY` to enable it." Then skip to Step 6.
 
-**If `RMOA_API_KEY` is set**, upload the spec and get scores + full issue list:
+**If `RMOA_API_KEY` is set**, upload the spec and get scores + full issue list.
+
+Write the response to a file first (don't pipe curl into `python3 -c`). RMOA responses can contain literal control characters inside JSON strings, which Python's strict JSON parser rejects when reading from stdin. Saving to a file and parsing with `strict=False` avoids both that and shell byte-mangling.
 
 ```bash
 curl -s -X POST \
   -H "Authorization: Bearer $RMOA_API_KEY" \
   -F "apiFile=@[/absolute/path/to/spec.json]" \
-  "https://api.ratemyopenapi.com/sync-report" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
+  -o /tmp/rmoa-response.json \
+  -w "HTTP:%{http_code} SIZE:%{size_download}\n" \
+  "https://api.ratemyopenapi.com/sync-report"
+```
+
+Check that the curl call returned `HTTP:200` and a non-zero size before parsing. If not, RMOA itself is the problem — retry or skip linting.
+
+Then parse the saved response:
+
+```bash
+python3 -c "
+import json
+data = json.loads(open('/tmp/rmoa-response.json').read(), strict=False)
 r = data['results']['simpleReport']
 issues = data['results']['fullReport']['issues']
 print(f'Score: {r[\"score\"]} | Docs: {r[\"docsScore\"]} | Completeness: {r[\"completenessScore\"]} | SDK: {r[\"sdkGenerationScore\"]} | Security: {r[\"securityScore\"]}')
