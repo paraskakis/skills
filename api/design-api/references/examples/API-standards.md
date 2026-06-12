@@ -2,7 +2,7 @@
 
 ## Guidelines:
 1. Default to a HTTP REST API unless otherwise specified.
-2. Follow Joshua Bloch’s principles in “How to Design a Good API and Why it Matters”: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/32713.pdf
+2. Follow Joshua Bloch's principles in "How to Design a Good API and Why it Matters": https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/32713.pdf
    * Characteristics of a good API:
    * Easy to learn
    * Easy to use, even without documentation
@@ -41,10 +41,17 @@ All responses must use JSON.
 ### Resources:
 1. Pluralize resource names.
 2. You should nest resources to follow object relations, but not more than 3 levels. If an object is a child object of another, it should be nested - for example, `projects/{id}/tasks`.
+3. Nest collection operations, but keep item-level operations flat - for example, `GET projects/{id}/tasks` and `POST projects/{id}/tasks` are good, but prefer `GET /tasks/{id}`, `PUT /tasks/{id}` and `DELETE /tasks/{id}` over `projects/{id}/tasks/{id}`, which is unnecessarily complex. Exception: keep the nested item path when the item's identifier is only unique within its parent (common with slugs - see IDs).
+
+### Methods
+Avoid using PATCH unless specifically requested and appropriate to the use case. Prefer PUT instead.
 
 ### Properties:
 1. Use camelCase for field names and parameters.
 2. If possible, use enums over strings
+
+### Query Parameters:
+1. Use lowercase and don't depend on casing.
 
 ### Security:
 1. Always implement authentication unless your input indicates otherwise.
@@ -56,7 +63,9 @@ All responses must use JSON.
 7. Never use Basic Auth
 
 ### IDs:
-Use UUIDs throughout for all resource identifiers, unless otherwise specified for each resource in requirements - Follow https://www.rfc-editor.org/rfc/rfc9562.html
+1. Default to UUIDs for all resource identifiers, unless otherwise specified for each resource in requirements - Follow https://www.rfc-editor.org/rfc/rfc9562.html
+2. Use slugs or well-known codes instead when the requirements ask for them, or when a natural, stable, public identifier exists - for example, public handles, country codes, currency codes, airport codes, postal codes, or public entities such as a school or a cohort.
+3. Slugs are often unique only within their parent resource - if so, keep the nested item path (see Resources).
 
 ### Dates:
 Use ISO 8601 Dates - Follow https://datatracker.ietf.org/doc/html/rfc3339 &  https://datatracker.ietf.org/doc/html/rfc9557
@@ -66,7 +75,7 @@ Use ISO 8601 Dates - Follow https://datatracker.ietf.org/doc/html/rfc3339 &  htt
 
 ### Errors:
 1. Document all possible error conditions.
-2. Use the Problem Details format to describe error responses as described in https://www.rfc-editor.org/rfc/rfc9457.html
+2. Use the Problem Details format to describe error responses as described in https://www.rfc-editor.org/rfc/rfc9457.html and make sure errors have the `application/problem+json` media type.
 
 ### Status Codes:
 1. Use status codes 200, 201, 202 and 204 appropriately for successful responses.
