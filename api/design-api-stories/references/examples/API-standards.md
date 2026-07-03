@@ -1,7 +1,7 @@
 # Emmanuel Paraskakis's API Standards
 
 ## Guidelines:
-1. Default to a HTTP "REST" API unless otherwise specified.
+1. Default to an HTTP "REST" API unless otherwise specified.
 2. Follow Joshua Bloch's principles in "How to Design a Good API and Why it Matters": https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/32713.pdf
    * Characteristics of a good API:
    * Easy to learn
@@ -58,8 +58,8 @@ One convention per surface - no exceptions, no special cases:
 
 ### Resources:
 1. Pluralize resource names.
-2. You SHOULD nest collection paths to follow object relations, but not more than 3 levels - for example, `projects/{id}/tasks`.
-3. Nest collection operations, but keep item-level operations flat - for example, `GET projects/{id}/tasks` and `POST projects/{id}/tasks` are good, but prefer `GET /tasks/{id}`, `PUT /tasks/{id}` and `DELETE /tasks/{id}` over `projects/{id}/tasks/{id}`, which is unnecessarily complex. Exception: keep the nested item path when the item's identifier is only unique within its parent (common with slugs - see IDs).
+2. You SHOULD nest collection paths to follow object relations, but not more than 3 levels - for example, `/projects/{id}/tasks`.
+3. Nest collection operations, but keep item-level operations flat - for example, `GET /projects/{id}/tasks` and `POST /projects/{id}/tasks` are good, but prefer `GET /tasks/{id}`, `PUT /tasks/{id}` and `DELETE /tasks/{id}` over `/projects/{id}/tasks/{id}`, which is unnecessarily complex. Exception: keep the nested item path when the item's identifier is only unique within its parent (common with slugs - see IDs).
 4. Every collection resource MUST have a list endpoint (GET on the collection). Agents cannot guess IDs - discovery starts at the list.
 
 ### Outcome Endpoints:
