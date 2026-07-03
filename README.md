@@ -29,6 +29,22 @@ For the full experience (automated linting + local preview):
 
 Without these, the skills still generate a complete OpenAPI spec.
 
+## Agent-Ready CLI
+
+- **agent-ready-cli-story** — Workflow story and product-surface fit.
+- **agent-ready-cli-spec** — Exact CLI command contract from stories, requirements, or an OpenAPI file.
+- **agent-ready-cli-audit** — Evidence-based audit of an existing CLI against the Agent-Ready CLI Checklist.
+- **agent-ready-cli-build** — Git-ready repo-on-disk implementation from a spec or OpenAPI file, with tests, docs, and distribution instructions.
+- **agent-ready-cli-end-to-end** — Full story → spec → build → audit/eval pipeline, unattended after one input round.
+
+All five accept an **OpenAPI file as the preferred input** when the CLI wraps an API, gather inputs once so they can run unattended, and never push or publish on their own. See `cli/README.md` for details.
+
+Install all CLI skills:
+
+```bash
+npx skills add paraskakis/skills/cli
+```
+
 ## Install
 
 ### All skills

@@ -1,13 +1,12 @@
 ---
 name: agent-ready-cli-audit
-description: "Use when evaluating an existing CLI, repo, docs, or installed command against the Agent-Ready CLI Checklist. This is evidence-first audit mode: inspect docs/code and run commands where possible, score the checklist, identify agent-blocking gaps, and produce prioritized fixes. Do not invent a greenfield design unless asked."
+description: "Audit an existing CLI against the Agent-Ready CLI Checklist. Evidence-first: identifies the target command, runs it with --help and safe read-only commands, finds install instructions and the docs page, scores the checklist, and produces prioritized fixes. Use when user says '/agent-ready-cli-audit' or asks to audit a CLI, check whether a CLI is agent-ready, or review a CLI/repo/docs for agent readiness. Does not design new commands."
 license: MIT
 metadata:
-  version: "0.1.0"
-  author: "Level 250 / Hermes Agent draft"
-  hermes:
-    tags: [cli, agents, audit, scorecard, evidence, checklist]
-    related_skills: [agent-ready-cli-spec, agent-ready-cli-build]
+  version: "0.2.0"
+  author: "Emmanuel Paraskakis / Level 250"
+  tags: "cli, agents, audit, scorecard, evidence, checklist"
+  related-skills: "agent-ready-cli-spec, agent-ready-cli-build"
 ---
 
 # Agent-Ready CLI Audit
@@ -24,26 +23,44 @@ The audit asks:
 
 ## Included References
 
-Linked reference files:
-
-- `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric.
-
-Use the linked checklist as the source of truth for scoring.
+- `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric. Use it as the source of truth for scoring.
 
 ## When to Use
 
 Use when the user asks:
 
-- “Audit this CLI.”
-- “Is this CLI agent-ready?”
-- “Compare this CLI to the checklist.”
-- “Review this repo/docs for CLI agent readiness.”
-- “Tell me what to fix first.”
+- "Audit this CLI."
+- "Is this CLI agent-ready?"
+- "Compare this CLI to the checklist."
+- "Review this repo/docs for CLI agent readiness."
+- "Tell me what to fix first."
 
 Do not use for greenfield command design; use `agent-ready-cli-spec`.
 Do not use for implementation; use `agent-ready-cli-build`.
 
+## Inputs
+
+| Input | Required | Notes |
+|---|---|---|
+| Target CLI | Yes | Installed command name, repo path, npm/PyPI/Homebrew package name, or docs URL — any one is enough. |
+| Focus workflows | No | Specific workflows the user cares about most. |
+| Safe environment | No | Whether mutating commands may be exercised. Default: no — read-only commands only. |
+| Credentials | No | Env var names for auth'd commands. Never ask the user to paste secrets into the conversation; ask for names of env vars already set in the shell. |
+
+**Gather inputs once, then run unattended.** If the target CLI is not stated, ask ONE consolidated question: "Which CLI should I audit? Give me the command name (plus repo path or docs URL if you have them). Should I stick to read-only commands?" After that, complete the entire audit without further questions. When something is ambiguous mid-run, choose the safe option (read-only), log the assumption in the report, and continue.
+
 ## Audit Workflow
+
+### 0. Identify and onboard the target
+
+Before scoring anything, onboard the way a fresh agent would:
+
+1. **Locate the command**: `which <tool>`. If not installed, find install instructions (README, `npm view <pkg>`, `brew info <tool>`, PyPI page). Do not install without the user's permission; audit from docs/source with lowered confidence instead.
+2. **Run discovery commands**: `<tool> --help`, `<tool> -h`, `<tool> --version`, and `--help` on the key subcommands.
+3. **Find the install path**: identify the documented one-line install (brew, npm/npx, pipx/uvx, curl script, releases page) and whether it would work in a clean environment.
+4. **Find the docs page**: from help-text links, README links, or package metadata. If web access is available, load the docs page and note whether it shows the top workflows as copy-paste commands.
+
+Completion criterion: the audit records where the CLI comes from, how it installs, and where its docs live — or explicitly states these could not be found (that is itself a finding).
 
 ### 1. Gather evidence
 
@@ -71,7 +88,7 @@ Completion criterion: audit distinguishes observed evidence from untested assump
 
 ### 2. Score the checklist
 
-Score each category:
+Score each category per `references/agent-ready-cli-checklist-v2.md`:
 
 - `0` = missing or agent-hostile;
 - `1` = partial/unreliable/undocumented;
@@ -127,6 +144,8 @@ Completion criterion: recommendation is actionable and does not overclaim certai
 
 ## Output Format
 
+Save the full report to a file (default `agent-ready-cli-audit-<tool>.md` in the working directory, or wherever the user asked) and give the verdict summary in the conversation.
+
 ```markdown
 # Agent-Ready CLI Audit: [CLI]
 
@@ -135,6 +154,14 @@ Completion criterion: recommendation is actionable and does not overclaim certai
 Status: Agent-ready / Mostly ready / Partially ready / Human-only CLI / Wrong surface
 Score: N/30
 Confidence: high/medium/low based on evidence available
+
+## Target
+
+Command: ... | Version: ... | Install path: ... | Docs page: ...
+
+## Assumptions
+
+- [anything assumed because the run was unattended]
 
 ## Evidence inspected
 
@@ -171,12 +198,15 @@ Confidence: high/medium/low based on evidence available
 3. **Overvaluing pretty terminal UX.** Rich output is fine only if headless/JSON mode works.
 4. **Ignoring tests.** Agent-readiness should be testable, not just documented.
 5. **Inventing command contracts during audit.** Audit first; spec redesign second.
+6. **Interrogating the user.** One consolidated question round at most; then run to completion.
 
 ## Verification Checklist
 
+- [ ] Target command, version, install path, and docs page are identified (or their absence is reported as a finding).
 - [ ] Evidence sources are listed.
 - [ ] Safe commands were run where possible.
 - [ ] Scores are tied to evidence.
 - [ ] Agent blockers are prioritized.
 - [ ] Fixes are concrete.
+- [ ] Report is saved to a file; assumptions are logged.
 - [ ] Recommendation distinguishes audit facts from design hypotheses.

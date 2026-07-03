@@ -1,13 +1,12 @@
 ---
 name: agent-ready-cli-build
-description: "Use when implementing, scaffolding, or modifying an agent-ready CLI in a repository. Takes a CLI spec or explicit workflow requirements and produces a repo-on-disk deliverable: source code, executable metadata, tests, docs, and verification transcript. Does not push, publish, or submit unless explicitly requested."
+description: "Implement, scaffold, or modify an agent-ready CLI in a repository. Takes a CLI spec, an OpenAPI file (preferred when wrapping an API), or requirements, and produces a git-initialized repo on disk ready to push: source code, executable metadata, passing tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), and a verification transcript. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-build' or asks to build or implement a CLI. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.1.0"
-  author: "Level 250 / Hermes Agent draft"
-  hermes:
-    tags: [cli, agents, implementation, build, testing, npm, python, go, rust]
-    related_skills: [agent-ready-cli-spec, agent-ready-cli-audit, agent-ready-cli-end-to-end]
+  version: "0.2.0"
+  author: "Emmanuel Paraskakis / Level 250"
+  tags: "cli, agents, implementation, build, testing, npm, homebrew, python, go, rust, openapi"
+  related-skills: "agent-ready-cli-spec, agent-ready-cli-audit, agent-ready-cli-end-to-end"
 ---
 
 # Agent-Ready CLI Build
@@ -16,11 +15,9 @@ metadata:
 
 Use this skill to build or modify a CLI in a repo.
 
-The primary deliverable is the **repo on disk**: source code, executable wiring, tests, docs, and verification evidence. Pushing, publishing, opening PRs, or releasing are separate actions that require explicit user instruction.
+The primary deliverable is a **git-ready repo on disk**: source code, executable wiring, passing tests, docs, distribution instructions, local commits, and verification evidence — ready for the user to review and push. Pushing, publishing, opening PRs, or releasing are separate actions that require explicit user instruction.
 
 ## Included References
-
-Linked reference files:
 
 - `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric.
 - `references/frameworks-and-implementation-guidance.md` — framework selection and implementation guidance.
@@ -29,27 +26,40 @@ Linked reference files:
 
 Use when the user asks to:
 
-- build a new CLI end-to-end from an existing spec;
+- build a new CLI end-to-end from a spec, OpenAPI file, or requirements;
 - add agent-ready behavior to an existing CLI;
 - implement `--json`, stdin, dry-run, auth status, exit codes, verification commands, or tests;
 - produce a ready-to-test local package/binary;
 - create docs/guidelines and verification transcript.
 
-If there is no workflow/spec, use `agent-ready-cli-story` and `agent-ready-cli-spec` first, or ask for/declare assumptions.
+## Inputs
+
+| Input | Required | Notes |
+|---|---|---|
+| Contract source | Yes | A CLI spec (from `agent-ready-cli-spec`), an OpenAPI file (**preferred when the CLI wraps an API**), or plain requirements. |
+| Target directory | Yes | Where the repo lives or should be created. |
+| CLI name | No | Default: derive from spec/API title. |
+| Language/framework | No | Default: choose per `references/frameworks-and-implementation-guidance.md` and say why. |
+| Credentials for live testing | No | Env var **names** only — never ask the user to paste secrets. Enables the optional live-endpoint step. |
+| Distribution targets | No | npm, Homebrew, pipx/uvx, GitHub Releases, Docker. Default: the natural one for the chosen language, documented for the rest. |
+
+If the contract source or target directory is missing, ask ONE consolidated question round covering exactly these inputs. **Then run unattended** — complete the build without pausing, and log defaults chosen under Assumptions in the final summary. If only an OpenAPI file or requirements were given (no spec), first produce a condensed command contract (per `agent-ready-cli-spec`'s derivation rules) inside `docs/cli-spec.md`, then build against it.
 
 ## Actual Deliverables
 
-### Default: ready-to-test repo on disk
+### Default: git-ready repo on disk
 
 Unless the user explicitly asks to push/publish/submit, deliver:
 
 - source code changed/created in the target repo;
+- **git initialized** (`git init` if not already a repo) with a `.gitignore` and meaningful local commits at milestones — scaffold, commands, tests, docs — so the history is reviewable; never `git push`;
 - executable entrypoint wired (`package.json` `bin`, Python console script, Go/Rust binary target, etc.);
-- package/project metadata updated;
+- package/project metadata updated (name, version, description, license, repository placeholder);
 - tests added and passing locally;
-- docs added/updated (`README.md`, `CLI_GUIDELINES.md`, `docs/cli.md`, etc.);
-- verification transcript saved, e.g. `artifacts/agent-cli-eval.md`;
-- concise summary of changed files and commands run.
+- docs added/updated: `README.md` (quickstart, install, top workflows, auth setup, safety model, troubleshooting);
+- **`DISTRIBUTION.md`** — exact, copy-paste instructions for every relevant channel: npm (`npm publish` steps, `npx` usage, semver/tagging), Homebrew (formula or tap steps), pipx/uvx, GitHub Releases (binary + checksums), Docker if relevant. Instructions only — do not run publish commands;
+- verification transcript saved to `artifacts/agent-cli-eval.md`;
+- concise summary of changed files, commands run, and assumptions made.
 
 ### Node/npm deliverables
 
@@ -76,12 +86,12 @@ Depending on scope:
 
 ### 1. Confirm or create the implementation contract
 
-Require or produce:
+Require or produce (in `docs/cli-spec.md` if absent):
 
 - command tree;
-- JSON schemas;
-- auth model;
-- config precedence;
+- JSON schemas (reuse OpenAPI `components/schemas` when wrapping an API);
+- auth model (derive from OpenAPI `securitySchemes`: apiKey → env var; OAuth → token env var/file + `auth login`; none → no auth commands);
+- config precedence, including API base-URL config when wrapping an API;
 - dry-run/confirm behavior;
 - verification commands;
 - error and exit-code tables;
@@ -92,7 +102,7 @@ Completion criterion: code can be judged against a concrete spec.
 
 ### 2. Choose framework by scope
 
-Default guidance:
+Default guidance (details in `references/frameworks-and-implementation-guidance.md`):
 
 - **oclif** for serious multi-command Node/TypeScript product CLIs with plugins/generated docs.
 - **commander/yargs/clipanion/cac** for smaller Node CLIs.
@@ -108,7 +118,7 @@ Prioritize:
 
 - `tool --help`
 - `tool --version`
-- `tool auth status --json`
+- `tool auth status --json` (if the API has auth)
 - inspect commands (`list/get/status/logs/history --json`)
 - plan/dry-run commands
 - confirmed mutating commands
@@ -129,28 +139,25 @@ Tests must cover:
 - dry-run/confirm;
 - verify-after-action workflow.
 
-Docs must include:
+Network-dependent tests must not require live credentials: mock/stub the API by default so `npm test`/`pytest` passes in a clean clone.
 
-- quickstart;
-- top workflows;
-- auth setup;
-- examples;
-- troubleshooting;
-- safety model.
+Docs must include: quickstart; install (matching `DISTRIBUTION.md`); top workflows as copy-paste commands; auth setup; examples; troubleshooting; safety model.
 
 Completion criterion: tests pass and docs include copy-paste workflows.
 
-### 5. Run agent eval
+### 5. Optional: live endpoint check, then agent eval
 
-Run or simulate with real commands in a safe environment:
+**Live endpoint check (optional, never blocking):** if the API's server URL is real and required credentials exist as env vars (check with `test -n "$VAR"` — never print values), verify the CLI works against the real API: run auth status, one read-only list/get command, and confirm parseable `--json` output. If credentials or network are missing, skip, use the mocked test evidence, and record the skip in the transcript.
+
+**Agent eval:** run the loop with real commands in a safe environment:
 
 ```text
 discover → auth → inspect → plan → act → verify → summarize
 ```
 
-Save transcript to `artifacts/agent-cli-eval.md` or equivalent.
+Save the transcript with actual commands and outputs to `artifacts/agent-cli-eval.md`.
 
-Completion criterion: final report cites actual commands and outputs.
+Completion criterion: final report cites actual commands and outputs, and states whether live API testing ran or was skipped.
 
 ## Submission Boundary
 
@@ -159,32 +166,36 @@ Do not push, publish, open PRs, or release unless explicitly asked.
 Deliverable ladder:
 
 1. local repo ready to test;
-2. local commit/branch;
+2. local commits on a branch (default deliverable);
 3. pushed branch;
 4. opened PR;
 5. packed artifact;
 6. published package/release.
 
-Levels 3–6 require explicit instruction.
+Levels 3–6 require explicit instruction. `DISTRIBUTION.md` documents how to do 5–6; the skill does not do them.
 
 ## Common Pitfalls
 
 1. **Snippet-only output.** The deliverable is a repo state, not a pasted code sample.
 2. **Prompt/TUI-only implementation.** Agents need headless commands.
 3. **JSON polluted by banners/spinners.** `--json` stdout must parse directly.
-4. **No verification transcript.** “Tests pass” is not the same as an agent workflow proof.
+4. **No verification transcript.** "Tests pass" is not the same as an agent workflow proof.
 5. **Publishing by surprise.** Never push/publish/release without explicit permission.
+6. **Tests that need secrets.** A clean clone must pass tests with no credentials set.
+7. **Uncommitted work.** Milestone commits make the deliverable reviewable and recoverable; end with a clean `git status`.
+8. **Printing secrets.** Check env vars with existence tests; never echo values into logs or transcripts.
 
 ## Verification Checklist
 
 - [ ] Repo on disk contains implementation.
+- [ ] Git initialized, `.gitignore` present, milestone commits made, `git status` clean, nothing pushed.
 - [ ] Executable entrypoint is wired.
-- [ ] Tests pass.
-- [ ] Docs are updated.
+- [ ] Tests pass without live credentials.
+- [ ] Docs are updated; `DISTRIBUTION.md` covers every relevant channel with copy-paste steps.
 - [ ] `--help` and `--version` work.
 - [ ] `--json` output parses.
 - [ ] stdout/stderr are separated.
 - [ ] Mutations have dry-run/confirm where applicable.
 - [ ] Verification command proves results.
-- [ ] Agent eval transcript is saved.
-- [ ] Final status says ready-to-test, ready-to-submit, or published with evidence.
+- [ ] Agent eval transcript is saved; live API check performed or skip recorded.
+- [ ] Final status says ready-to-test, ready-to-submit, or published with evidence, plus assumptions made.

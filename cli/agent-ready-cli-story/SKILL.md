@@ -1,13 +1,12 @@
 ---
 name: agent-ready-cli-story
-description: "Use when defining what an agent-ready CLI should expose before writing commands: actors, environments, jobs-to-be-done, product-surface fit, workflow stories, success evidence, and non-goals. This is the upstream story/workflow skill for CLI strategy, analogous to an API story skill; it does not produce implementation code."
+description: "Define what an agent-ready CLI should expose before writing commands: actors, environments, jobs-to-be-done, product-surface fit, workflow stories, success evidence, and non-goals. Accepts requirements and/or an OpenAPI spec as input and asks for requirements if missing. Use when user says '/agent-ready-cli-story' or asks what CLI to build, which workflows a CLI should expose, or whether CLI/API/MCP/Skill/UI is the right surface. Does not produce implementation code."
 license: MIT
 metadata:
-  version: "0.1.0"
-  author: "Level 250 / Hermes Agent draft"
-  hermes:
-    tags: [cli, agents, product-strategy, workflows, mcp, skills]
-    related_skills: [agent-ready-cli-spec, agent-ready-cli-end-to-end]
+  version: "0.2.0"
+  author: "Emmanuel Paraskakis / Level 250"
+  tags: "cli, agents, product-strategy, workflows, mcp, skills"
+  related-skills: "agent-ready-cli-spec, agent-ready-cli-end-to-end"
 ---
 
 # Agent-Ready CLI Story
@@ -24,25 +23,38 @@ Do not design a command tree until the actor, workflow, side effects, and succes
 
 ## Included References
 
-Linked reference files:
-
-- `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric.
-
-Use the checklist for terminology and evaluation criteria, but keep this skill focused on workflow story and product-surface fit.
+- `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric. Use it for terminology and evaluation criteria; keep this skill focused on workflow story and product-surface fit.
 
 ## When to Use
 
 Use when the user asks:
 
-- “What CLI should we build?”
-- “Which workflows should the CLI expose?”
-- “Should this be API, CLI, MCP, Skill, UI, or TUI?”
-- “What would make this product agent-consumable?”
-- “Help me prepare a CLI workshop/product strategy story.”
+- "What CLI should we build?"
+- "Which workflows should the CLI expose?"
+- "Should this be API, CLI, MCP, Skill, UI, or TUI?"
+- "What would make this product agent-consumable?"
+- "Help me prepare a CLI workshop/product strategy story."
 
 Do not use for existing-CLI evidence audits; use `agent-ready-cli-audit`.
 Do not use for command contracts; use `agent-ready-cli-spec`.
 Do not use for implementation; use `agent-ready-cli-build`.
+
+## Inputs
+
+| Input | Required | Notes |
+|---|---|---|
+| Requirements | Yes* | Who the users/agents are, what jobs they need done, pain points, constraints. A file or a paragraph both work. |
+| OpenAPI spec | No — preferred when the CLI wraps an API | Operations reveal candidate workflows; `securitySchemes` reveal auth constraints; `servers` reveal environments. |
+| Existing docs/product context | No | Product docs, existing CLI/API docs, competitor notes. |
+
+*At least one of requirements or an OpenAPI spec is required. If neither is provided, ask ONE consolidated question round:
+
+> 1. Who is the primary actor (human dev, local coding agent, CI agent, chat assistant)?
+> 2. What jobs should the tool do (top 3 workflows)?
+> 3. Is there an existing API underneath — and do you have its OpenAPI file?
+> 4. Any constraints (auth, environments, compliance, destructive operations)?
+
+**Then run unattended.** After the input round, produce the complete story document without further questions. If only an OpenAPI file was given, derive requirements from it (operations → jobs, securitySchemes → auth constraints) and log every inference under Assumptions.
 
 ## Workflow
 
@@ -58,6 +70,8 @@ Capture:
 Completion criterion: every target actor has an environment and capability profile.
 
 ### 2. Define workflow stories
+
+If an OpenAPI spec was provided, mine it first: group operations into workflows (not one story per endpoint), and use `securitySchemes`/`servers` to fill auth and environment fields.
 
 Use this format:
 
@@ -105,6 +119,8 @@ Completion criterion: workflows are ranked as v1 / later / do not build.
 
 ## Output Format
 
+Save the story document to a file (default `cli-story-<product>.md`, or wherever the user asked) and summarize the recommendation in the conversation.
+
 ```markdown
 # Agent-Ready CLI Story: [Product]
 
@@ -115,6 +131,10 @@ Primary actor: ...
 Primary surface: CLI / API / MCP / Skill / UI / TUI
 Supporting surfaces: ...
 Do not build: ...
+
+## Assumptions
+
+- [inferences made from the OpenAPI spec or unattended-mode defaults]
 
 ## Actor/environment map
 
@@ -135,7 +155,7 @@ Do not build: ...
 
 ## Handoff to spec
 
-The next skill should be `agent-ready-cli-spec` using these workflow stories.
+The next skill should be `agent-ready-cli-spec` using these workflow stories (plus the OpenAPI file if one exists).
 ```
 
 ## Common Pitfalls
@@ -145,6 +165,7 @@ The next skill should be `agent-ready-cli-spec` using these workflow stories.
 3. **Ignoring success evidence.** If the agent cannot verify success, the story is incomplete.
 4. **Overloading v1.** Start with high-value, low-risk, verifiable workflows.
 5. **Treating Skill as a surface by itself.** Skill teaches; API/CLI/MCP executes.
+6. **One story per endpoint.** An OpenAPI file lists operations; stories describe workflows that may span several operations.
 
 ## Verification Checklist
 
@@ -153,4 +174,6 @@ The next skill should be `agent-ready-cli-spec` using these workflow stories.
 - [ ] Surface recommendation includes alternatives and boundaries.
 - [ ] v1 workflows are prioritized.
 - [ ] Non-goals are stated.
+- [ ] Assumptions are logged (especially anything inferred from an OpenAPI file).
+- [ ] Story document is saved to a file.
 - [ ] Handoff to CLI spec is clear.

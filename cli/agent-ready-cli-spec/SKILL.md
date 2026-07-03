@@ -1,13 +1,12 @@
 ---
 name: agent-ready-cli-spec
-description: "Use when turning CLI workflow stories into an exact agent-ready command contract: command tree, grammar, flags, config precedence, auth, JSON schemas, stdin/stdout/stderr, dry-run/confirm behavior, verification commands, errors, exit codes, tests, and docs. This is the design/spec skill, not the implementation skill."
+description: "Turn CLI workflow stories, requirements, or an OpenAPI spec into an exact agent-ready command contract: command tree, grammar, flags, config precedence, auth, JSON schemas, stdin/stdout/stderr, dry-run/confirm behavior, verification commands, errors, exit codes, tests, and docs. Asks for requirements if none are given; OpenAPI file is the preferred input when the CLI wraps an API. Use when user says '/agent-ready-cli-spec' or asks to design a CLI command contract or write a CLI spec. Design only — not implementation."
 license: MIT
 metadata:
-  version: "0.1.0"
-  author: "Level 250 / Hermes Agent draft"
-  hermes:
-    tags: [cli, agents, specification, command-contract, json, testing]
-    related_skills: [agent-ready-cli-story, agent-ready-cli-build, agent-ready-cli-end-to-end]
+  version: "0.2.0"
+  author: "Emmanuel Paraskakis / Level 250"
+  tags: "cli, agents, specification, command-contract, json, openapi, testing"
+  related-skills: "agent-ready-cli-story, agent-ready-cli-build, agent-ready-cli-end-to-end"
 ---
 
 # Agent-Ready CLI Spec
@@ -24,8 +23,6 @@ discover → authenticate → inspect → plan/dry-run → act → verify → re
 
 ## Included References
 
-Linked reference files:
-
 - `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric.
 - `references/frameworks-and-implementation-guidance.md` — framework and implementation guidance.
 
@@ -33,14 +30,40 @@ Linked reference files:
 
 Use when the user asks:
 
-- “Design the CLI command contract.”
-- “Write a CLI spec.”
-- “Turn these workflows into commands.”
-- “Give Claude Code/Codex/Replit the spec to build this.”
-- “Define JSON schemas / exit codes / auth behavior.”
+- "Design the CLI command contract."
+- "Write a CLI spec."
+- "Turn these workflows into commands."
+- "Give a coding agent the spec to build this."
+- "Define JSON schemas / exit codes / auth behavior."
 
-If the workflow story is missing, use `agent-ready-cli-story` first or explicitly state assumptions.
 If implementation is requested after the spec, hand off to `agent-ready-cli-build`.
+
+## Inputs
+
+| Input | Required | Notes |
+|---|---|---|
+| Workflow stories | One of these three | Output of `agent-ready-cli-story`. Best input for a well-grounded spec. |
+| OpenAPI spec | One of these three — **preferred when the CLI wraps an API** | Paths → resource nouns; operations → verbs; `components/schemas` → JSON output schemas; `securitySchemes` → auth model; `servers` → environment/base-URL config. |
+| Requirements | One of these three | Plain-language description of actors and workflows; the skill will state story-level assumptions. |
+| CLI name | No | Proposed binary name. Default: derive from the product/API title. |
+
+If none of the three are provided, ask ONE consolidated question round: "What should this CLI do, and for whom? Do you have an OpenAPI file for the underlying API (preferred), or workflow stories/requirements I should work from? Any preferred CLI name?"
+
+**Then run unattended.** After inputs are in hand, produce the complete spec without pausing. Log every inference (especially anything derived from the OpenAPI file) under Assumptions in the output.
+
+### Deriving the contract from an OpenAPI file
+
+When an OpenAPI file is the input:
+
+- map `paths` to resources and operations to verbs (`GET /todos` → `tool todos list`, `POST /todos` → `tool todos create`);
+- reuse `components/schemas` as the `--json` output schemas — do not invent parallel shapes;
+- map `securitySchemes` to the auth model: apiKey → `TOOL_API_KEY` env var + `auth status`; OAuth → token file/env var + `auth login` for humans; no schemes → no auth commands, say so;
+- map `servers` to base-URL config (`--base-url` flag > `TOOL_BASE_URL` env var > config file > spec default);
+- group endpoints into workflows before designing commands — the CLI is not a 1:1 endpoint mirror; skip or merge endpoints that don't serve a workflow, and record that decision.
+
+### Optional: validate the contract against the live API
+
+If the OpenAPI `servers` URL is real and credentials are available as env vars (ask for env var **names** only — never ask the user to paste secrets), send one or two safe read-only GET requests to confirm the spec's assumptions (auth header name, response shape). If no credentials or no network, skip and note it. This step must never block the spec.
 
 ## Workflow
 
@@ -68,7 +91,7 @@ tool <resource> <verb> [args] [flags]
 Include:
 
 - root help and version;
-- auth commands;
+- auth commands (if the API has auth);
 - inspect commands;
 - plan/dry-run commands;
 - mutating commands with explicit confirmation;
@@ -101,7 +124,7 @@ For each mutating command, specify:
 - returned resource IDs;
 - verification command.
 
-Completion criterion: the spec prevents “acted but cannot prove it.”
+Completion criterion: the spec prevents "acted but cannot prove it."
 
 ### 5. Specify errors, exit codes, and tests
 
@@ -116,6 +139,8 @@ Completion criterion: failure behavior is as testable as success behavior.
 
 ## Output Format
 
+Save the spec to a file (default `cli-spec-<tool>.md`, or wherever the user asked) and summarize in the conversation.
+
 ```markdown
 # Agent-Ready CLI Spec: [Product]
 
@@ -124,6 +149,11 @@ Completion criterion: failure behavior is as testable as success behavior.
 Workflows covered: ...
 Non-goals: ...
 Primary actor/environment: ...
+Source inputs: stories / OpenAPI file / requirements
+
+## Assumptions
+
+- [inferences from OpenAPI or unattended-mode defaults; endpoints skipped/merged and why]
 
 ## Command tree
 
@@ -142,11 +172,11 @@ Primary actor/environment: ...
 
 ## JSON schemas
 
-[schemas]
+[schemas — reuse OpenAPI components where they exist]
 
 ## Config and auth
 
-[precedence, env vars, config files, auth status]
+[precedence, env vars, config files, auth status; API base URL config if wrapping an API]
 
 ## Safety model
 
@@ -160,6 +190,10 @@ Primary actor/environment: ...
 
 [tests]
 
+## Live API check
+
+[performed/skipped; what was confirmed]
+
 ## Build handoff
 
 Recommended next skill: `agent-ready-cli-build`.
@@ -168,16 +202,19 @@ Recommended next skill: `agent-ready-cli-build`.
 ## Common Pitfalls
 
 1. **Specifying verbs without verification.** Every mutating workflow needs a verification command.
-2. **Vague JSON.** Sketch exact fields and stable schemas.
+2. **Vague JSON.** Sketch exact fields and stable schemas — reuse OpenAPI components when available.
 3. **Human-only auth.** Browser login is not enough for agents.
 4. **No TTY plan.** Agents and CI often run without interactive terminals.
 5. **Framework-first thinking.** Choose oclif/commander/etc. after the contract.
+6. **Mirroring the API 1:1.** Commands serve workflows, not endpoints.
+7. **Blocking on live checks.** The live API validation is optional evidence, never a gate.
 
 ## Verification Checklist
 
 - [ ] Every workflow has command coverage for the agent execution loop.
 - [ ] JSON/stdout/stderr/stdin behavior is specified.
-- [ ] Auth and config precedence are specified.
+- [ ] Auth and config precedence are specified (derived from securitySchemes when an OpenAPI file exists).
 - [ ] Safety and verification behavior are specified.
 - [ ] Error and exit-code tables are included.
 - [ ] Test plan is concrete enough for implementation.
+- [ ] Assumptions are logged; spec saved to a file.
