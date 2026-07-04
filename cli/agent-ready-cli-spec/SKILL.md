@@ -3,7 +3,7 @@ name: agent-ready-cli-spec
 description: "Turn CLI workflow stories, requirements, or an OpenAPI spec into an exact agent-ready command contract: command tree, grammar, flags, config precedence, auth, JSON schemas, stdin/stdout/stderr, dry-run/confirm behavior, verification commands, errors, exit codes, tests, and docs. Asks for requirements if none are given; OpenAPI file is the preferred input when the CLI wraps an API. Use when user says '/agent-ready-cli-spec' or asks to design a CLI command contract or write a CLI spec. Design only — not implementation."
 license: MIT
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   author: "Emmanuel Paraskakis / Level 250"
   tags: "cli, agents, specification, command-contract, json, openapi, testing"
   related-skills: "agent-ready-cli-story, agent-ready-cli-build, agent-ready-cli-end-to-end"
@@ -47,19 +47,29 @@ If implementation is requested after the spec, hand off to `agent-ready-cli-buil
 | Requirements | One of these three | Plain-language description of actors and workflows; the skill will state story-level assumptions. |
 | CLI name | No | Proposed binary name. Default: derive from the product/API title. |
 
-If none of the three are provided, ask ONE consolidated question round: "What should this CLI do, and for whom? Do you have an OpenAPI file for the underlying API (preferred), or workflow stories/requirements I should work from? Any preferred CLI name?"
+If none of the three are provided, ask ONE consolidated question round:
 
-**Then run unattended.** After inputs are in hand, produce the complete spec without pausing. Log every inference (especially anything derived from the OpenAPI file) under Assumptions in the output.
+> 1. What should this CLI do, and for whom (human dev, local coding agent, CI agent)?
+> 2. Do you have an OpenAPI file for the underlying API (preferred)? Or workflow stories/requirements I should work from?
+> 3. For the top workflows: do any change data (create/update/delete), and how would success be verified?
+> 4. Any constraints (auth, environments, compliance)? Any preferred CLI name?
+
+**Then run unattended.** After inputs are in hand, produce the complete spec without pausing. Log every inference (especially anything derived from the OpenAPI file) under Assumptions in the output — including fields the question round could not gather (side-effect levels, success evidence) that you inferred per workflow.
+
+**CLI name heuristic** (when none is given): derive a short, typeable binary name from the product/API title — drop generic words (API, Public, Service, REST), keep one memorable stem (e.g., "Flight Tracking Public API" → `flighttrack`).
 
 ### Deriving the contract from an OpenAPI file
 
 When an OpenAPI file is the input:
 
-- map `paths` to resources and operations to verbs (`GET /todos` → `tool todos list`, `POST /todos` → `tool todos create`);
+- map `paths` to resources and operations to verbs (`GET /todos` → `tool todos list`, `POST /todos` → `tool todos create`); a filter-heavy collection GET whose summary implies searching becomes `search`, not `list`;
 - reuse `components/schemas` as the `--json` output schemas — do not invent parallel shapes;
-- map `securitySchemes` to the auth model: apiKey → `TOOL_API_KEY` env var + `auth status`; OAuth → token file/env var + `auth login` for humans; no schemes → no auth commands, say so;
+- map `securitySchemes` to the auth model: apiKey → `TOOL_API_KEY` env var + `auth status --json`, plus documented key acquisition (this satisfies the checklist's auth-login item — `auth login` is for interactive/OAuth flows only); OAuth → token file/env var + `auth login` for humans; no schemes → no auth commands, say so;
 - map `servers` to base-URL config (`--base-url` flag > `TOOL_BASE_URL` env var > config file > spec default);
+- derive error behavior even when the OpenAPI file omits it: real APIs return 401/403/429 whether or not the spec documents them — include standard auth/rate-limit error codes and mark them as inferred. Use the default exit-code and error-code table in `references/frameworks-and-implementation-guidance.md` unless the user has a convention;
 - group endpoints into workflows before designing commands — the CLI is not a 1:1 endpoint mirror; skip or merge endpoints that don't serve a workflow, and record that decision.
+
+**Read-only APIs:** if the spec has no mutating operations, say so explicitly. Dry-run/confirm/verify-after-mutation sections become "N/A — read-only" (stated, not silently skipped); verification means re-fetching state.
 
 ### Optional: validate the contract against the live API
 

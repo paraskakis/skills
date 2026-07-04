@@ -116,7 +116,7 @@ tool projects list --json | jq '.projects[].id'
 
 - [ ] Env-var auth is supported where appropriate, e.g. `ACME_API_KEY`.
 - [ ] Config-file auth is documented.
-- [ ] `auth login` exists for humans where auth is required.
+- [ ] `auth login` exists for humans where auth is interactive (OAuth/browser flows). For plain API-key schemes, documented key acquisition plus `auth status` satisfies this item.
 - [ ] `auth status --json` exists for agents.
 - [ ] Missing, expired, and insufficient credentials fail differently and clearly.
 - [ ] Required scopes/permissions are documented.

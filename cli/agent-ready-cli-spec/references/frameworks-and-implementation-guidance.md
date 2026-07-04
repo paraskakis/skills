@@ -105,6 +105,27 @@ Before choosing a framework, write:
 
 Framework choice should serve this contract, not substitute for it.
 
+## Default exit-code and error-code table
+
+Use this scheme unless the project already has a convention — don't invent a new one per CLI:
+
+| Exit code | Meaning | Error code examples |
+|---:|---|---|
+| 0 | Success | — |
+| 1 | Unexpected/internal error | `E_INTERNAL` |
+| 2 | Usage/validation error (bad flag, invalid argument) | `E_USAGE`, `E_VALIDATION` |
+| 3 | Resource not found | `E_NOT_FOUND` |
+| 4 | Auth failure (distinguish in the error code) | `E_AUTH_MISSING`, `E_AUTH_INVALID`, `E_AUTH_FORBIDDEN` |
+| 5 | Conflict / precondition failed | `E_CONFLICT` |
+| 6 | Rate limited | `E_RATE_LIMIT` |
+| 7 | Upstream API/server error | `E_API` |
+
+Error output rules: human-readable message on stderr; in `--json` mode also emit a machine envelope `{"error": {"code": "E_NOT_FOUND", "message": "...", "hint": "..."}}`. Real APIs return 401/403/429 even when the OpenAPI file omits them — spec and implement these paths anyway, marked as inferred.
+
+## Testing without live credentials
+
+Tests must pass in a clean clone with no secrets set. Preferred pattern: start a local HTTP stub server inside the test suite and point the CLI's `--base-url`/`TOOL_BASE_URL` override at it — this exercises the real HTTP client and justifies the base-URL config existing at all. Caution: interception libraries like nock do not catch Node's native fetch (undici) by default; a real local server avoids the trap. Keep any live-API tests in a separate, optional test target gated on credential presence.
+
 ## Node implementation notes
 
 For any Node CLI:

@@ -3,7 +3,7 @@ name: agent-ready-cli-build
 description: "Implement, scaffold, or modify an agent-ready CLI in a repository. Takes a CLI spec, an OpenAPI file (preferred when wrapping an API), or requirements, and produces a git-initialized repo on disk ready to push: source code, executable metadata, passing tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), and a verification transcript. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-build' or asks to build or implement a CLI. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   author: "Emmanuel Paraskakis / Level 250"
   tags: "cli, agents, implementation, build, testing, npm, homebrew, python, go, rust, openapi"
   related-skills: "agent-ready-cli-spec, agent-ready-cli-audit, agent-ready-cli-end-to-end"
@@ -40,7 +40,7 @@ Use when the user asks to:
 | Target directory | Yes | Where the repo lives or should be created. |
 | CLI name | No | Default: derive from spec/API title. |
 | Language/framework | No | Default: choose per `references/frameworks-and-implementation-guidance.md` and say why. |
-| Credentials for live testing | No | Env var **names** only — never ask the user to paste secrets. Enables the optional live-endpoint step. |
+| Credentials for live testing | No | Env var **names** only — never ask the user to paste secrets. A credential-helper command the user points to (e.g., `export GITHUB_TOKEN=$(gh auth token)`) is also fine. Enables the optional live-endpoint step. |
 | Distribution targets | No | npm, Homebrew, pipx/uvx, GitHub Releases, Docker. Default: the natural one for the chosen language, documented for the rest. |
 
 If the contract source or target directory is missing, ask ONE consolidated question round covering exactly these inputs. **Then run unattended** — complete the build without pausing, and log defaults chosen under Assumptions in the final summary. If only an OpenAPI file or requirements were given (no spec), first produce a condensed command contract (per `agent-ready-cli-spec`'s derivation rules) inside `docs/cli-spec.md`, then build against it.
@@ -94,7 +94,7 @@ Require or produce (in `docs/cli-spec.md` if absent):
 - config precedence, including API base-URL config when wrapping an API;
 - dry-run/confirm behavior;
 - verification commands;
-- error and exit-code tables;
+- error and exit-code tables (default table in `references/frameworks-and-implementation-guidance.md` — don't invent a new scheme per project);
 - framework choice;
 - test plan.
 
@@ -139,7 +139,7 @@ Tests must cover:
 - dry-run/confirm;
 - verify-after-action workflow.
 
-Network-dependent tests must not require live credentials: mock/stub the API by default so `npm test`/`pytest` passes in a clean clone.
+Network-dependent tests must not require live credentials: mock/stub the API by default so `npm test`/`pytest` passes in a clean clone. Preferred pattern: start a local HTTP stub server in the test suite and point the CLI's `--base-url`/`TOOL_BASE_URL` override at it — this exercises the real HTTP layer and justifies the base-URL config. (Note: interception libraries like nock do not catch Node's native fetch/undici by default.)
 
 Docs must include: quickstart; install (matching `DISTRIBUTION.md`); top workflows as copy-paste commands; auth setup; examples; troubleshooting; safety model.
 

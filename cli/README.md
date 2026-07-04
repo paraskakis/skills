@@ -19,7 +19,7 @@ Every skill gathers its inputs **once**, up front, then runs to completion so yo
 - **Credentials (optional)** — names of env vars already set in your shell (never pasted secrets). Enables optional live-endpoint testing so the built CLI is proven against the real API. Without them, tests run mocked and the skills note the skip.
 - **Target CLI (audit only)** — a command name, repo path, package name, or docs URL.
 
-All five skills score and enforce the shared **Agent-Ready CLI Checklist** (`references/agent-ready-cli-checklist-v2.md`).
+All five skills score and enforce the shared **Agent-Ready CLI Checklist** — each skill bundles it at `<skill>/references/agent-ready-cli-checklist-v2.md`.
 
 ## Outputs
 

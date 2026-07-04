@@ -3,7 +3,7 @@ name: agent-ready-cli-story
 description: "Define what an agent-ready CLI should expose before writing commands: actors, environments, jobs-to-be-done, product-surface fit, workflow stories, success evidence, and non-goals. Accepts requirements and/or an OpenAPI spec as input and asks for requirements if missing. Use when user says '/agent-ready-cli-story' or asks what CLI to build, which workflows a CLI should expose, or whether CLI/API/MCP/Skill/UI is the right surface. Does not produce implementation code."
 license: MIT
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   author: "Emmanuel Paraskakis / Level 250"
   tags: "cli, agents, product-strategy, workflows, mcp, skills"
   related-skills: "agent-ready-cli-spec, agent-ready-cli-end-to-end"
@@ -43,18 +43,18 @@ Do not use for implementation; use `agent-ready-cli-build`.
 
 | Input | Required | Notes |
 |---|---|---|
-| Requirements | Yes* | Who the users/agents are, what jobs they need done, pain points, constraints. A file or a paragraph both work. |
-| OpenAPI spec | No — preferred when the CLI wraps an API | Operations reveal candidate workflows; `securitySchemes` reveal auth constraints; `servers` reveal environments. |
+| Requirements | One of these two | Who the users/agents are, what jobs they need done, pain points, constraints. A file or a paragraph both work. |
+| OpenAPI spec | One of these two — **preferred when the CLI wraps an API** | Operations reveal candidate workflows; `securitySchemes` reveal auth constraints; `servers` reveal environments. |
 | Existing docs/product context | No | Product docs, existing CLI/API docs, competitor notes. |
 
-*At least one of requirements or an OpenAPI spec is required. If neither is provided, ask ONE consolidated question round:
+If neither requirements nor an OpenAPI spec is provided, ask ONE consolidated question round:
 
 > 1. Who is the primary actor (human dev, local coding agent, CI agent, chat assistant)?
 > 2. What jobs should the tool do (top 3 workflows)?
 > 3. Is there an existing API underneath — and do you have its OpenAPI file?
 > 4. Any constraints (auth, environments, compliance, destructive operations)?
 
-**Then run unattended.** After the input round, produce the complete story document without further questions. If only an OpenAPI file was given, derive requirements from it (operations → jobs, securitySchemes → auth constraints) and log every inference under Assumptions.
+**Then run unattended.** After the input round, produce the complete story document without further questions. If only an OpenAPI file was given, derive requirements from it (operations → jobs, securitySchemes → auth constraints) and log every inference under Assumptions. Note: an OpenAPI file describes the API, not the calling agent's environment — in OpenAPI-only mode, default the actor/environment profile to "local coding agent + CI, shell/network/env-var capable" and log that as an assumption.
 
 ## Workflow
 
@@ -71,7 +71,7 @@ Completion criterion: every target actor has an environment and capability profi
 
 ### 2. Define workflow stories
 
-If an OpenAPI spec was provided, mine it first: group operations into workflows (not one story per endpoint), and use `securitySchemes`/`servers` to fill auth and environment fields.
+If an OpenAPI spec was provided, mine it first: group operations into workflows (not one story per endpoint), and use `securitySchemes`/`servers` to fill auth and environment fields. Grouping example: `GET /flights` + `GET /flights/{id}` + `GET /airports/{id}` → one "track a flight" workflow, because the actor's job spans all three. If the API is fully read-only, every story's side effects are legitimately "none" — state it, don't invent mutations.
 
 Use this format:
 

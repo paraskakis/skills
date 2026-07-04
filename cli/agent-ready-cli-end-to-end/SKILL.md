@@ -3,7 +3,7 @@ name: agent-ready-cli-end-to-end
 description: "Deliver a complete agent-ready CLI end to end: gather inputs once (requirements and/or an OpenAPI file — preferred), then run story → spec → build → audit/eval unattended. Produces a git-initialized repo ready to push with tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), verification transcript, and a final checklist score. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from idea (or API) to implementation. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   author: "Emmanuel Paraskakis / Level 250"
   tags: "cli, agents, end-to-end, orchestration, build, audit, openapi"
   related-skills: "agent-ready-cli-story, agent-ready-cli-spec, agent-ready-cli-build, agent-ready-cli-audit"
@@ -52,6 +52,12 @@ Do not use when the user only wants an audit, spec, or framework recommendation 
 | Distribution targets | No | npm, Homebrew, pipx/uvx, GitHub Releases, Docker. Default: the natural channel for the language; others documented. |
 
 If required inputs are missing, ask ONE consolidated question round covering this table — nothing else. After that, **run the entire pipeline to completion without pausing for approval**, so the user can walk away. Record every default and inference in an Assumptions section of the final report. Only stop mid-run for destructive or irreversible actions (there should be none — this skill never pushes or publishes).
+
+Verify credential env vars (presence only, `test -n "$VAR"`) once at the input round and again at the audit/eval phase — sessions and tokens can change during a long build. A credential-helper command the user points to (e.g., `export GITHUB_TOKEN=$(gh auth token)`) counts as available credentials.
+
+**Execute the phases inline.** The four phase sections below summarize the sibling skills (`agent-ready-cli-story/spec/build/audit`). Do NOT re-invoke those skills as separate skill calls and do NOT re-run their own input rounds — this skill's single input round replaces them all. If the sibling SKILL.md files are installed, consult them for detail when a phase summary is not enough; otherwise the summaries here are sufficient to execute.
+
+**N/A policy (applies to every phase):** when a checklist item genuinely doesn't apply — e.g., dry-run/confirm for a fully read-only API — state "N/A" with the reason. Never silently skip, and never invent mutations to satisfy the template.
 
 ## Workflow
 
@@ -114,9 +120,9 @@ Completion criterion: final report states score, evidence, remaining gaps, and d
 
 ## Delivery status
 
-Status: ready-to-test / ready-to-submit / pushed / PR opened / published
+Status: ready-to-test (committed locally, nothing pushed — the default) / pushed / PR opened / packed / published
 Repo path: ...
-Branch/commits: ...
+Commits: [paste `git log --oneline`]
 
 ## Assumptions
 

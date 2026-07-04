@@ -3,7 +3,7 @@ name: agent-ready-cli-audit
 description: "Audit an existing CLI against the Agent-Ready CLI Checklist. Evidence-first: identifies the target command, runs it with --help and safe read-only commands, finds install instructions and the docs page, scores the checklist, and produces prioritized fixes. Use when user says '/agent-ready-cli-audit' or asks to audit a CLI, check whether a CLI is agent-ready, or review a CLI/repo/docs for agent readiness. Does not design new commands."
 license: MIT
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   author: "Emmanuel Paraskakis / Level 250"
   tags: "cli, agents, audit, scorecard, evidence, checklist"
   related-skills: "agent-ready-cli-spec, agent-ready-cli-build"
@@ -47,7 +47,14 @@ Do not use for implementation; use `agent-ready-cli-build`.
 | Safe environment | No | Whether mutating commands may be exercised. Default: no — read-only commands only. |
 | Credentials | No | Env var names for auth'd commands. Never ask the user to paste secrets into the conversation; ask for names of env vars already set in the shell. |
 
-**Gather inputs once, then run unattended.** If the target CLI is not stated, ask ONE consolidated question: "Which CLI should I audit? Give me the command name (plus repo path or docs URL if you have them). Should I stick to read-only commands?" After that, complete the entire audit without further questions. When something is ambiguous mid-run, choose the safe option (read-only), log the assumption in the report, and continue.
+**Gather inputs once, then run unattended.** If the target CLI is named in the request, skip questions entirely — proceed straight to Step 0 with the table's defaults for everything else. Only if the target is missing, ask ONE consolidated question: "Which CLI should I audit? Give me the command name (plus repo path or docs URL if you have them). Should I stick to read-only commands?" After that, complete the entire audit without further questions. When anything is ambiguous mid-run, choose the safe option (read-only), log the assumption in the report, and continue.
+
+**Expected fallbacks (all fine — log them, lower confidence where noted):**
+- Source/tests not reasonably available (closed or large repo): score category 14 from inferred evidence and mark it low-confidence rather than cloning everything.
+- No web access: skip the docs-page fetch, note degraded confidence on docs-related items.
+- Clean-environment install can't be truly verified read-only: reason from package metadata and docs, mark as unverified.
+- Working directory not writable: save the report wherever writes are permitted and state the path.
+- Environment already authenticated as a real user: read-only commands are still fine; cite only the minimum account evidence needed (no token values, no scopes dumps beyond the finding).
 
 ## Audit Workflow
 
@@ -83,6 +90,8 @@ tool <resource> list --json
 ```
 
 Avoid destructive commands unless the user explicitly provides a safe test environment.
+
+**Stopping rule:** don't `--help` every leaf of a large CLI. Sample until each checklist category has at least one piece of direct evidence, favoring the user's focus workflows; then stop.
 
 Completion criterion: audit distinguishes observed evidence from untested assumptions.
 
