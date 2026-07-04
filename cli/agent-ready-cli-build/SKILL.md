@@ -22,15 +22,15 @@ The primary deliverable is a **git-ready repo on disk**: source code, executable
 - `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric.
 - `references/frameworks-and-implementation-guidance.md` — framework selection and implementation guidance.
 
-## When to Use
+## Scope and Routing
 
-Use when the user asks to:
+Triggering is defined in the frontmatter description. In scope:
 
-- build a new CLI end-to-end from a spec, OpenAPI file, or requirements;
-- add agent-ready behavior to an existing CLI;
-- implement `--json`, stdin, dry-run, auth status, exit codes, verification commands, or tests;
-- produce a ready-to-test local package/binary;
-- create docs/guidelines and verification transcript.
+- building a new CLI end-to-end from a spec, OpenAPI file, or requirements;
+- adding agent-ready behavior to an existing CLI (`--json`, stdin, dry-run, auth status, exit codes, verification commands, tests);
+- producing a ready-to-test local package/binary with docs and a verification transcript.
+
+For the full idea-to-delivery pipeline (story and spec included), route to `agent-ready-cli-end-to-end`.
 
 ## Inputs
 
@@ -174,7 +174,23 @@ Deliverable ladder:
 
 Levels 3–6 require explicit instruction. `DISTRIBUTION.md` documents how to do 5–6; the skill does not do them.
 
-## Common Pitfalls
+## Output Format
+
+End with this summary in the conversation:
+
+```markdown
+# Build Summary: [tool]
+
+Status: ready-to-test (committed locally, nothing pushed — the default) / pushed / PR opened / packed / published
+Repo path: ...
+Commits: [git log --oneline]
+Tests: [command] → N passing (no credentials required)
+Live API check: performed (evidence) / skipped (reason)
+Changed files: ...
+Assumptions: ...
+Next actions: [exact commands to test locally; publish steps are in DISTRIBUTION.md]
+```
+
 
 1. **Snippet-only output.** The deliverable is a repo state, not a pasted code sample.
 2. **Prompt/TUI-only implementation.** Agents need headless commands.

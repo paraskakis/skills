@@ -25,18 +25,9 @@ The audit asks:
 
 - `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric. Use it as the source of truth for scoring.
 
-## When to Use
+## Scope and Routing
 
-Use when the user asks:
-
-- "Audit this CLI."
-- "Is this CLI agent-ready?"
-- "Compare this CLI to the checklist."
-- "Review this repo/docs for CLI agent readiness."
-- "Tell me what to fix first."
-
-Do not use for greenfield command design; use `agent-ready-cli-spec`.
-Do not use for implementation; use `agent-ready-cli-build`.
+Triggering is defined in the frontmatter description. In scope: evidence-based review of an existing CLI, repo, or docs. Out of scope: greenfield command design (use `agent-ready-cli-spec`) and implementation (use `agent-ready-cli-build`).
 
 ## Inputs
 

@@ -26,17 +26,9 @@ discover → authenticate → inspect → plan/dry-run → act → verify → re
 - `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric.
 - `references/frameworks-and-implementation-guidance.md` — framework and implementation guidance.
 
-## When to Use
+## Scope and Routing
 
-Use when the user asks:
-
-- "Design the CLI command contract."
-- "Write a CLI spec."
-- "Turn these workflows into commands."
-- "Give a coding agent the spec to build this."
-- "Define JSON schemas / exit codes / auth behavior."
-
-If implementation is requested after the spec, hand off to `agent-ready-cli-build`.
+Triggering is defined in the frontmatter description. In scope: designing the exact command contract (tree, I/O, auth, schemas, errors, tests). Out of scope: implementation — hand off to `agent-ready-cli-build` when it is requested after the spec.
 
 ## Inputs
 

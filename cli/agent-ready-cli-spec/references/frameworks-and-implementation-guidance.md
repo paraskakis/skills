@@ -66,7 +66,7 @@ Use:
 - Python Typer/Click if the product/workflow is Python-native;
 - Go Cobra/urfave if static binary helps.
 
-Avoid overbuilding plugin architecture before the command contract is proven.
+Avoid overbuilding plugin architecture before the command contract is proven. (Input validation, safe error handling, and auth hygiene are baseline requirements, never "overbuilding.")
 
 ### Scenario C — human setup wizard plus agent automation
 

@@ -28,17 +28,9 @@ The output is a complete delivery package: workflow story, CLI spec, git-ready r
 - `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric.
 - `references/frameworks-and-implementation-guidance.md` — framework selection and implementation guidance.
 
-## When to Use
+## Scope and Routing
 
-Use when the user asks:
-
-- "Build us an agent-ready CLI."
-- "Take this from idea to implementation."
-- "Turn this OpenAPI spec into a CLI."
-- "Do the full CLI workflow."
-- "Create the CLI and prove it works."
-
-Do not use when the user only wants an audit, spec, or framework recommendation — use the single skill instead.
+Triggering is defined in the frontmatter description. In scope: the complete idea-(or OpenAPI)-to-delivery pipeline. Out of scope: when the user wants only one artifact — route to the single skill (`agent-ready-cli-audit`, `-spec`, `-story`, or `-build`) instead.
 
 ## Inputs — gather once, then run unattended
 

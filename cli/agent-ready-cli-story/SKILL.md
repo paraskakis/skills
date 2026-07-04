@@ -25,19 +25,9 @@ Do not design a command tree until the actor, workflow, side effects, and succes
 
 - `references/agent-ready-cli-checklist-v2.md` — canonical checklist and scoring rubric. Use it for terminology and evaluation criteria; keep this skill focused on workflow story and product-surface fit.
 
-## When to Use
+## Scope and Routing
 
-Use when the user asks:
-
-- "What CLI should we build?"
-- "Which workflows should the CLI expose?"
-- "Should this be API, CLI, MCP, Skill, UI, or TUI?"
-- "What would make this product agent-consumable?"
-- "Help me prepare a CLI workshop/product strategy story."
-
-Do not use for existing-CLI evidence audits; use `agent-ready-cli-audit`.
-Do not use for command contracts; use `agent-ready-cli-spec`.
-Do not use for implementation; use `agent-ready-cli-build`.
+Triggering is defined in the frontmatter description. In scope: deciding which workflows a CLI should expose and whether CLI is the right surface. Out of scope: existing-CLI evidence audits (`agent-ready-cli-audit`), command contracts (`agent-ready-cli-spec`), implementation (`agent-ready-cli-build`).
 
 ## Inputs
 
@@ -165,7 +155,7 @@ The next skill should be `agent-ready-cli-spec` using these workflow stories (pl
 3. **Ignoring success evidence.** If the agent cannot verify success, the story is incomplete.
 4. **Overloading v1.** Start with high-value, low-risk, verifiable workflows.
 5. **Treating Skill as a surface by itself.** Skill teaches; API/CLI/MCP executes.
-6. **One story per endpoint.** An OpenAPI file lists operations; stories describe workflows that may span several operations.
+6. **One story per endpoint.** An OpenAPI file lists operations; stories describe workflows, which typically span 2–5 operations.
 
 ## Verification Checklist
 
