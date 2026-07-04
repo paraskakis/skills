@@ -1,6 +1,6 @@
 ---
 name: agent-ready-cli-audit
-description: "Audit an existing CLI against the Agent-Ready CLI Checklist. Evidence-first: identifies the target command, runs it with --help and safe read-only commands, finds install instructions and the docs page, scores the checklist, and produces prioritized fixes. Use when user says '/agent-ready-cli-audit' or asks to audit a CLI, check whether a CLI is agent-ready, or review a CLI/repo/docs for agent readiness. Does not design new commands."
+description: "Audit an existing CLI against the Agent-Ready CLI Checklist. Evidence-first: identifies the target command, runs it with --help and safe read-only commands, finds install instructions and the docs page, scores the checklist, and produces prioritized fixes. Use when user says '/agent-ready-cli-audit' or asks to audit a CLI, check whether a CLI is agent-ready, or review a CLI/repo/docs for agent readiness — including questions like 'is our CLI good for agents?' or 'why do coding agents get stuck with our tool?'. Does not design new commands."
 license: MIT
 metadata:
   version: "0.3.0"

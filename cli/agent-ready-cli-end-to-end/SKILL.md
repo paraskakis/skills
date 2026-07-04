@@ -1,6 +1,6 @@
 ---
 name: agent-ready-cli-end-to-end
-description: "Deliver a complete agent-ready CLI end to end: gather inputs once (requirements and/or an OpenAPI file — preferred), then run story → spec → build → audit/eval unattended. Produces a git-initialized repo ready to push with tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), verification transcript, and a final checklist score. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from idea (or API) to implementation. Does not push, publish, or submit unless explicitly requested."
+description: "Deliver a complete agent-ready CLI end to end: gather inputs once (requirements and/or an OpenAPI file — preferred), then run story → spec → build → audit/eval unattended. Produces a git-initialized repo ready to push with tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), verification transcript, and a final checklist score. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from idea (or API) to implementation — prefer this over agent-ready-cli-build when starting from an idea, requirements, or a bare OpenAPI file with no existing spec or repo. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
   version: "0.3.0"
