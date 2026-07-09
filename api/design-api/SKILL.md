@@ -193,7 +193,7 @@ Before writing the file:
 
 ## Step 8: Save the Spec
 
-Save as JSON to a location the user specifies, or ask where they'd like it saved.
+Save as JSON to a location the user specifies, or ask where they'd like it saved. No specific naming convention required.
 
 **Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number and try again.
 
