@@ -1,9 +1,9 @@
 ---
 name: design-api-review
-description: Review an OpenAPI specification against API standards and OpenAPI best practices. Produces a divergence report (verdict per standards section, each finding citing the rule it breaks) for the user to review; fixes are applied only after the user decides. Use when user says "/design-api-review" or asks to review, audit, or check an OpenAPI spec against standards. Does not generate a spec (that is `design-api-spec`) and does not review implementation code.
+description: Review an OpenAPI specification against API standards and OpenAPI best practices. Point it at a spec — a path on disk, a URL, or a GitHub repo — and it reviews against its own bundled standards and best practices unless you supply yours. Produces a divergence report (verdict per standards section, each finding citing the rule it breaks) for the user to review; fixes are applied only after the user decides. Use when user says "/design-api-review" or asks to review, audit, or check an OpenAPI spec against standards. The spec is the only required input. Does not generate a spec (that is `design-api-spec`) and does not review implementation code.
 license: MIT
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -15,20 +15,25 @@ Review an existing OpenAPI specification against an API standards file and an Op
 
 ## Scope and Routing
 
-Triggering is defined in the frontmatter description. In scope: reviewing an existing OpenAPI spec against a standards file and an OpenAPI best-practices file. Out of scope: generating a spec (use `design-api-spec`) and reviewing implementation code.
+Triggering is defined in the frontmatter description. In scope: reviewing an existing OpenAPI spec — supplied as a path, a URL, or a GitHub repo — against a standards ruleset and an OpenAPI best-practices ruleset, defaulting to the bundled ones. Out of scope: generating a spec (use `design-api-spec`) and reviewing implementation code.
 
 ## Inputs
 
-Identify each file by its `# Title` heading or content, not by filename. If any is missing, ask before proceeding.
+**Only the spec is required.** Ask for it in one line. Do not open a negotiation about the other inputs — they have defaults.
 
-1. **The OpenAPI spec under review** — JSON or YAML, any 3.x version.
-2. **API Standards** — the conventions ruleset. Look for a heading like `# API Standards` or `# Style Guide`.
-3. **OpenAPI Best Practices** — document-quality ruleset. Look for a heading like `# OpenAPI Best Practices`.
-4. *(Optional)* **Domain model and/or stories** — when provided, also check the spec tells the truth about the domain (property names, enums, relations).
+> Point me at the OpenAPI spec — a path on disk, a URL, or a GitHub repo.
+> I'll review it against my own standards and OpenAPI best practices, unless you'd rather give me yours.
 
-### Working Example
+1. **The OpenAPI spec under review** *(required)* — JSON or YAML, any 3.x version. Accept a path on disk, a URL to fetch, or a GitHub repo to find it in. Given a repo rather than a file, locate the spec and name the file you picked before reviewing it.
+2. **API Standards** *(optional)* — the conventions ruleset. **Defaults to `references/examples/API-standards.md`.** A user-supplied file supersedes it; identify it by a heading like `# API Standards` or `# Style Guide`.
+3. **OpenAPI Best Practices** *(optional)* — document-quality ruleset. **Defaults to `references/examples/OpenAPI-best-practices.md`.** A user-supplied file supersedes it; identify it by a heading like `# OpenAPI Best Practices`.
+4. **Domain model and/or stories** *(optional)* — when provided, also check the spec tells the truth about the domain (property names, enums, relations).
 
-See `references/examples/` for the standards and best-practices files this skill was built against (`API-standards.md`, `OpenAPI-best-practices.md`).
+Identify any supplied file by its `# Title` heading or content, not by filename. Never ask for a ruleset the user did not mention — state which rulesets you used at the top of the report and proceed. If no spec is given, ask for it and stop.
+
+### Bundled Rulesets
+
+`references/examples/` holds the two default rulesets: `API-standards.md` and `OpenAPI-best-practices.md`. **No sample spec is bundled** — the spec always comes from the user.
 
 ## Step 1: Read Everything
 
@@ -70,6 +75,9 @@ Deliver the report in this shape:
 ```
 ## API Design Review: [spec title] v[version]
 
+**Spec:** [path / URL / repo + file you picked]
+**Reviewed against:** [standards file] + [best-practices file] — [bundled defaults | supplied by user]
+
 **Verdict: [COMPLIANT | N divergences (X to fix, Y deliberate, Z to decide)]**
 
 ### Diverges (proposed fixes)
@@ -96,7 +104,7 @@ When the user says which findings to fix, apply them to the spec, then:
 
 ## Key Principles
 
-1. **The rulesets provided are the law.** Review against the files given, never against memorized API lore. If the standards file and your instincts disagree, the file wins.
+1. **The rulesets in play are the law.** Review against the files you actually loaded — the user's when supplied, the bundled defaults otherwise — never against memorized API lore. If the standards file and your instincts disagree, the file wins. Name the rulesets in the report so the reader knows which law was applied.
 2. **Cite or it didn't happen.** Every finding names the exact rule it breaks. A finding that can't cite a rule is an opinion — leave it out or label it explicitly as a suggestion.
 3. **Deliberate deviation is legitimate.** Standards themselves permit deviation with good reason. The review's job is to make every deviation visible and justified, not to enforce uniformity.
 4. **Report before repair.** The user decides what gets fixed. Never silently "improve" a spec while reviewing it.
