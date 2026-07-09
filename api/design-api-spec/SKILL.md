@@ -1,6 +1,10 @@
 ---
 name: design-api-spec
 description: Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and OpenAPI best practices. Lints with RateMyOpenAPI and iterates to 100/100. Use when user says "/design-api-spec" or asks to generate an OpenAPI spec from stories. Does not write the stories (that is `design-api-stories`) and does not review an existing spec (that is `design-api-review`).
+license: MIT
+metadata:
+  version: "1.0.0"
+  author: "Emmanuel Paraskakis / Level 250"
 ---
 
 # Design API Spec

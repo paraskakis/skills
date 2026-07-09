@@ -1,6 +1,10 @@
 ---
 name: design-api-stories
 description: Generate API design stories from requirements, a domain model, and API standards. Stories bridge product requirements and OpenAPI specs — Emmanuel Paraskakis's method for designing APIs with LLMs. Use when user says "/design-api-stories" or asks to generate API user stories from requirements. Does not generate an OpenAPI spec (that is `design-api-spec`).
+license: MIT
+metadata:
+  version: "1.0.0"
+  author: "Emmanuel Paraskakis / Level 250"
 ---
 
 # Design API Stories

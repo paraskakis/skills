@@ -1,6 +1,10 @@
 ---
 name: design-api
 description: Design an API end-to-end — from requirements to a validated OpenAPI spec. Generates stories for review, then produces a linted spec. Emmanuel Paraskakis's method for designing APIs with LLMs. Use when user says "/design-api" or asks to design an API from requirements or stories. For a single step only, use `design-api-stories`, `design-api-spec`, or `design-api-review` instead.
+license: MIT
+metadata:
+  version: "1.0.0"
+  author: "Emmanuel Paraskakis / Level 250"
 ---
 
 # Design API

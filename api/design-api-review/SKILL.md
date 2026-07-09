@@ -1,6 +1,10 @@
 ---
 name: design-api-review
 description: Review an OpenAPI specification against API standards and OpenAPI best practices. Produces a divergence report (verdict per standards section, each finding citing the rule it breaks) for the user to review; fixes are applied only after the user decides. Use when user says "/design-api-review" or asks to review, audit, or check an OpenAPI spec against standards. Does not generate a spec (that is `design-api-spec`) and does not review implementation code.
+license: MIT
+metadata:
+  version: "1.0.0"
+  author: "Emmanuel Paraskakis / Level 250"
 ---
 
 # API Design Review
