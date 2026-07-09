@@ -38,11 +38,9 @@ The user must provide (or point to) these files. Files can be named anything —
 **Optional (determines entry point):**
 5. **Stories** — API user stories with methods, resources, parameters. The human's design decisions — resource nesting, endpoint grouping, parameter choices. Look for a heading like `# Stories`, `# User Stories`, or similar. If provided → skip to Phase 2 (spec). If not → Phase 1 generates them for review.
 
-If any required file is missing, ask the user to provide it before proceeding. If the user doesn't have their own files yet, offer to use the bundled examples in `references/examples/` (a conference scheduling API) so they can try the skill end-to-end.
+If any required file is missing, ask the user to provide it before proceeding.
 
-<!-- TODO: Strengthen this instruction. Cowork (Mar 16, 2026) ignored it and invented a "Local Music Scene API" instead of using the bundled conference example when user said "no preference." Fix: "If the user does not specify a domain, USE the bundled conference example. Do not invent a new domain." -->
-
-<!-- TODO: Add Swagger UI preview step. After spec passes linting, generate a self-contained HTML file embedding the spec in Swagger UI. No server needed. In Cowork, this creates an artifact with a "Open in Safari" button — instant visual preview of the designed API. Great "here's what you built" moment. Discovered Mar 16, 2026 during Cowork testing. -->
+If the user has no files of their own, **use the bundled conference example in `references/examples/`. Do not invent a new domain.** When the user expresses no preference, that is not an invitation to make one up — run the conference scheduling API end-to-end so they see the method work on a complete, known-good input set. Invent a domain only if the user names one.
 
 ### Bundled Examples
 
@@ -90,12 +88,13 @@ For each story, output ONLY:
   * `paramName` (type, required/optional): Brief description.
 ```
 
-Rules:
+Rules for simple stories:
 - Method and resource MUST follow the API standards (naming, nesting, pluralization)
 - Parameters include path params, query params, and request body fields
 - Mark each parameter as required or optional
 - Use domain object names and property names exactly as defined
 - Do NOT include response schemas, error codes, headers, or implementation details
+- Do NOT include authentication details unless the standards specify something unusual
 
 ### Detailed Story Format (on request)
 
