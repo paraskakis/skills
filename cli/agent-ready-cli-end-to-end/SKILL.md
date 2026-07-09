@@ -3,17 +3,15 @@ name: agent-ready-cli-end-to-end
 description: "Deliver a complete agent-ready CLI end to end: gather inputs once (requirements and/or an OpenAPI file — preferred), then run story → spec → build → audit/eval unattended. Produces a git-initialized repo ready to push with tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), verification transcript, and a final checklist score. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from idea (or API) to implementation — prefer this over agent-ready-cli-build when starting from an idea, requirements, or a bare OpenAPI file with no existing spec or repo. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.3.0"
+  version: "0.3.2"
   author: "Emmanuel Paraskakis / Level 250"
-  tags: "cli, agents, end-to-end, orchestration, build, audit, openapi"
-  related-skills: "agent-ready-cli-story, agent-ready-cli-spec, agent-ready-cli-build, agent-ready-cli-audit"
 ---
 
 # Agent-Ready CLI End-to-End
 
 ## Overview
 
-Use this skill when the user wants the whole pipeline, not a single artifact.
+This skill runs the whole pipeline, not a single artifact.
 
 Pipeline:
 

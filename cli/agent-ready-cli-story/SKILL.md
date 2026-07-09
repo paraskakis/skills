@@ -3,10 +3,8 @@ name: agent-ready-cli-story
 description: "Define what an agent-ready CLI should expose before writing commands: actors, environments, jobs-to-be-done, product-surface fit, workflow stories, success evidence, and non-goals. Accepts requirements and/or an OpenAPI spec as input and asks for requirements if missing. Use when user says '/agent-ready-cli-story' or asks what CLI to build, which workflows a CLI should expose, or whether CLI/API/MCP/Skill/UI is the right surface. Does not produce implementation code."
 license: MIT
 metadata:
-  version: "0.3.0"
+  version: "0.3.2"
   author: "Emmanuel Paraskakis / Level 250"
-  tags: "cli, agents, product-strategy, workflows, mcp, skills"
-  related-skills: "agent-ready-cli-spec, agent-ready-cli-end-to-end"
 ---
 
 # Agent-Ready CLI Story

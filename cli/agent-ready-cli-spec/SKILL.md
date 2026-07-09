@@ -3,10 +3,8 @@ name: agent-ready-cli-spec
 description: "Turn CLI workflow stories, requirements, or an OpenAPI spec into an exact agent-ready command contract: command tree, grammar, flags, config precedence, auth, JSON schemas, stdin/stdout/stderr, dry-run/confirm behavior, verification commands, errors, exit codes, tests, and docs. Asks for requirements if none are given; OpenAPI file is the preferred input when the CLI wraps an API. Use when user says '/agent-ready-cli-spec' or asks to design a CLI command contract or write a CLI spec. Design only — not implementation."
 license: MIT
 metadata:
-  version: "0.3.0"
+  version: "0.3.2"
   author: "Emmanuel Paraskakis / Level 250"
-  tags: "cli, agents, specification, command-contract, json, openapi, testing"
-  related-skills: "agent-ready-cli-story, agent-ready-cli-build, agent-ready-cli-end-to-end"
 ---
 
 # Agent-Ready CLI Spec
