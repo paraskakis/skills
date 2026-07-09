@@ -4,6 +4,9 @@
 - [ ] Consider more extensive standards file
 - [ ] **Sample spec for `design-api-review`?** The skill bundles the two rulesets but no spec, so it cannot be run standalone — every invocation needs the user to bring one. A bundled conference-API spec (the output of running `design-api-spec` on the bundled conference stories + domain) would make it demoable and give the other three skills a shared worked example end to end. Open question, not yet decided: a bundled spec is a fifth thing to keep in sync with the standards, and a *clean* spec makes a dull review — a deliberately flawed one teaches more but has to be maintained as the rulesets evolve. Emmanuel wants to think about it. *(Raised Jul 9, 2026.)*
 
+## Skill Consistency
+- [ ] **`design-api-review`: make the Step 3 verdict names match the Step 4 report headings.** Step 3 defines three verdicts — `DIVERGES`, `DELIBERATE`, `UNJUSTIFIED-DELIBERATE` — but the Step 4 template heads the buckets "Diverges", "Deliberate", "Needs a decision". The third pair doesn't match, so the model has to translate `UNJUSTIFIED-DELIBERATE` → "Needs a decision" on every run. It does this correctly (observed Jul 9, 2026 on a Sonnet review of a Todo API spec: the `PUT /tasks/{taskId}` status split was documented as intentional but gave no reason, and was filed under "Needs a decision"), but the translation is avoidable. Rename the Step 3 verdict to `NEEDS-A-DECISION`, or rename the Step 4 heading — either way, one name per concept. *(Raised Jul 9, 2026. Not urgent — the skill behaves correctly today.)*
+
 ## Additional Linters / Scanners
 - [ ] Jentic scanner
 - [ ] 42Crunch scanner
