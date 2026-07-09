@@ -43,15 +43,29 @@ Without these, the skills still generate a complete OpenAPI spec.
 
 ## Agent-Ready CLI
 
-- **agent-ready-cli-story** — Workflow story and product-surface fit.
-- **agent-ready-cli-spec** — Exact CLI command contract from stories, requirements, or an OpenAPI file.
-- **agent-ready-cli-audit** — Evidence-based audit of an existing CLI against the Agent-Ready CLI Checklist.
-- **agent-ready-cli-build** — Git-ready repo-on-disk implementation from a spec or OpenAPI file, with tests, docs, and distribution instructions.
-- **agent-ready-cli-end-to-end** — Full story → spec → build → audit/eval pipeline, unattended after one input round.
+- **agent-ready-cli-story** — Workflow story and product-surface fit. Use before designing commands: actors, environments, jobs-to-be-done, success evidence, v1 priorities, and non-goals.
+- **agent-ready-cli-spec** — Turns stories, requirements, or an OpenAPI file into an exact CLI command contract: command tree, JSON schemas, auth and config, safety model, errors, exit codes, and tests.
+- **agent-ready-cli-audit** — Evidence-first review of an existing CLI against the Agent-Ready CLI Checklist. Identifies the target, runs it with `--help`, finds install instructions and docs, then produces a scorecard, blockers, quick wins, and a roadmap.
+- **agent-ready-cli-build** — Implements or modifies a CLI in a repo. Produces a git-initialized, ready-to-push repo: code, executable metadata, passing tests, docs, `DISTRIBUTION.md`, and a verification transcript.
+- **agent-ready-cli-end-to-end** — Orchestrates story → spec → build → audit/eval for a complete delivery package, unattended after one input round.
 
-All five accept an **OpenAPI file as the preferred input** when the CLI wraps an API, gather inputs once so they can run unattended, and never push or publish on their own. See `cli/README.md` for details.
+All five gather their inputs once, up front, then run to completion so you can walk away. They score against a shared **Agent-Ready CLI Checklist**, bundled with each skill at `<skill>/references/agent-ready-cli-checklist-v2.md`.
+
+### Inputs
+
+- **Requirements** — who the users and agents are, and what jobs the CLI must do. Story, spec, build, and end-to-end ask for these if you don't provide them.
+- **OpenAPI file (preferred)** — if the CLI wraps an API, give it the spec. The skills derive resources, verbs, JSON schemas, auth model (`securitySchemes`), and base URL (`servers`) from it.
+- **Credentials (optional)** — *names* of env vars already set in your shell, never pasted secrets. Enables live-endpoint testing so the built CLI is proven against the real API. Without them, tests run mocked and the skills say so.
+- **Target CLI (audit only)** — a command name, repo path, package name, or docs URL.
+
+### Outputs
+
+- Story, spec, and audit produce markdown reports saved to files.
+- Build and end-to-end produce a **git-ready repo on disk**: initialized, committed at milestones, tests passing without credentials, plus `README.md` and `DISTRIBUTION.md` with copy-paste publish steps for npm, Homebrew, pipx/uvx, and GitHub Releases. **Pushing and publishing remain yours** — no skill pushes or publishes on its own.
 
 ## Install
+
+All skills follow the [Agent Skills](https://agentskills.io) format and work across agents — Claude Code, Cursor, Codex, and others.
 
 ### Everything
 
