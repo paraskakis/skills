@@ -51,47 +51,56 @@ Without these, the skills still generate a complete OpenAPI spec.
 
 All five accept an **OpenAPI file as the preferred input** when the CLI wraps an API, gather inputs once so they can run unattended, and never push or publish on their own. See `cli/README.md` for details.
 
-Install all CLI skills:
-
-```bash
-npx skills add paraskakis/skills/cli
-```
-
 ## Install
 
-### All skills
+### Everything
 
 ```bash
 npx skills add paraskakis/skills
 ```
 
-### All API skills
+### One family
 
 ```bash
-npx skills add paraskakis/skills/api
+npx skills add paraskakis/skills/api    # the four API design skills
+npx skills add paraskakis/skills/cli    # the five agent-ready CLI skills
 ```
 
-### Just the combined API design skill
+### A single skill
+
+Each skill installs standalone, so you can take just the one you want:
 
 ```bash
 npx skills add paraskakis/skills --skill design-api
+npx skills add paraskakis/skills --skill design-api-review
+npx skills add paraskakis/skills --skill agent-ready-cli-end-to-end
 ```
 
 ### Agent-specific install
 
+Works with any of the paths above:
+
 ```bash
 npx skills add paraskakis/skills/api -a claude-code
-npx skills add paraskakis/skills/api -a cursor
-npx skills add paraskakis/skills/api -a codex
+npx skills add paraskakis/skills/cli -a cursor
+npx skills add paraskakis/skills/cli -a codex
 ```
 
 Add `-g` for global (user-level, available in all projects):
 
 ```bash
-npx skills add paraskakis/skills/api -a claude-code -g
+npx skills add paraskakis/skills/cli -a claude-code -g
+```
+
+Already installed? `npx skills update` takes **skill names**, not a repo, and defaults to project scope — pass `-g` for globally installed skills:
+
+```bash
+npx skills update -g design-api design-api-review
 ```
 
 ## Manual install (Claude Code)
+
+Copy any skill directory — `api/<skill>` or `cli/<skill>`. Each one is self-contained.
 
 **Project-scoped** (committed with your code):
 
@@ -99,6 +108,7 @@ npx skills add paraskakis/skills/api -a claude-code -g
 git clone https://github.com/paraskakis/skills.git /tmp/paraskakis-skills
 mkdir -p .claude/skills
 cp -R /tmp/paraskakis-skills/api/design-api .claude/skills/design-api
+cp -R /tmp/paraskakis-skills/cli/agent-ready-cli-audit .claude/skills/agent-ready-cli-audit
 ```
 
 **User-global** (available in all projects):
@@ -107,4 +117,5 @@ cp -R /tmp/paraskakis-skills/api/design-api .claude/skills/design-api
 git clone https://github.com/paraskakis/skills.git /tmp/paraskakis-skills
 mkdir -p ~/.claude/skills
 cp -R /tmp/paraskakis-skills/api/design-api ~/.claude/skills/design-api
+cp -R /tmp/paraskakis-skills/cli/agent-ready-cli-audit ~/.claude/skills/agent-ready-cli-audit
 ```
