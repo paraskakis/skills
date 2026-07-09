@@ -1,15 +1,15 @@
 ---
 name: design-api-spec
-description: Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and OpenAPI best practices. Lints with RateMyOpenAPI and iterates to 100/100. Use when user says "/design-api-spec" or asks to generate an OpenAPI spec from stories.
+description: Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and OpenAPI best practices. Lints with RateMyOpenAPI and iterates to 100/100. Use when user says "/design-api-spec" or asks to generate an OpenAPI spec from stories. Does not write the stories (that is `design-api-stories`) and does not review an existing spec (that is `design-api-review`).
 ---
 
 # Design API Spec
 
 Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and an OpenAPI best practices file. Then lint it with RateMyOpenAPI and fix issues. This is part of Emmanuel Paraskakis's method for designing APIs with LLMs. Stories can come from the companion `design-api-stories` skill or be written by hand — either way, this skill takes stories + domain + standards + OpenAPI best practices and produces a validated spec.
 
-## When to Use
+## Scope and Routing
 
-Use when the user says `/design-api-spec` or asks to generate an OpenAPI spec from stories.
+Triggering is defined in the frontmatter description. In scope: turning stories + domain + standards + best practices into a linted OpenAPI document. Out of scope: writing the stories (use `design-api-stories`), reviewing a spec you did not just generate (use `design-api-review`), and running the full pipeline (use `design-api`).
 
 ## Optional Dependencies
 

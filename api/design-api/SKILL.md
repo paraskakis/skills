@@ -1,6 +1,6 @@
 ---
 name: design-api
-description: Design an API end-to-end — from requirements to a validated OpenAPI spec. Generates stories for review, then produces a linted spec. Emmanuel Paraskakis's method for designing APIs with LLMs. Use when user says "/design-api" or asks to design an API.
+description: Design an API end-to-end — from requirements to a validated OpenAPI spec. Generates stories for review, then produces a linted spec. Emmanuel Paraskakis's method for designing APIs with LLMs. Use when user says "/design-api" or asks to design an API from requirements or stories. For a single step only, use `design-api-stories`, `design-api-spec`, or `design-api-review` instead.
 ---
 
 # Design API
@@ -9,9 +9,11 @@ Design an API end-to-end: requirements → stories → OpenAPI spec → lint →
 
 All four foundation files (requirements, domain, standards, OpenAPI best practices) are always required. Stories are optional — if provided, they represent the human's design decisions and the skill skips straight to spec generation. If not, the skill generates stories first and pauses for review.
 
-## When to Use
+## Scope and Routing
 
-Use when the user says `/design-api` or asks to design an API from requirements or stories.
+Triggering is defined in the frontmatter description. In scope: the complete requirements-to-linted-spec pipeline. Out of scope: when the user wants only one artifact — route to the single skill (`design-api-stories`, `design-api-spec`, or `design-api-review`) instead.
+
+**Execute the phases inline.** The phases below summarize the sibling skills (`design-api-stories`, `design-api-spec`). Do NOT re-invoke those skills as separate skill calls — this skill's own input gathering replaces theirs. If the sibling SKILL.md files are installed, consult them for detail when a phase summary is not enough; otherwise the content here is sufficient to execute.
 
 ## Optional Dependencies
 
