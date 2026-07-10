@@ -269,6 +269,10 @@ Watch for:
 
 If the agent gets stuck, the problem may not be the model. It may be your CLI UX.
 
+**The agent test is not optional colour — it is the evidence for two boxes.** Category 14's "Agent eval is run before claiming agent-readiness" ticks only when this test was actually run, and category 15's "The docs include an agent evaluation prompt" ticks only when a tailored prompt ships with the CLI. An audit that never runs the test leaves the first box open, which caps category 14 at `1` — correctly. "Verified" cannot be claimed for a category whose central test nobody executed.
+
+Run it against the user's focus workflow wherever the CLI is installed and a safe path exists: read-only commands, or a mutation with `--dry-run`. When it genuinely cannot be run — the CLI is not installed, no safe environment exists, no credentials — leave the box open, lower Confidence, and say in the Verdict that the ceiling was set by audit conditions rather than by the CLI. Never silently omit it.
+
 ---
 
 # Scoring rubric
@@ -278,6 +282,22 @@ Score each section:
 - `0` = missing or actively agent-hostile.
 - `1` = partially present but unreliable or undocumented.
 - `2` = works, documented, and verified.
+
+## How to score a category
+
+The checkboxes are the input; the `0/1/2` is the output. Count them, don't weigh them:
+
+- **All applicable items checked → `2`.**
+- **No applicable items checked → `0`.**
+- **Anything in between → `1`.** There is no fourth score, so nothing here is left to the auditor's discretion.
+
+Three rules govern what "checked" means:
+
+1. **A box ticks on evidence, not on claims.** Tick it when you ran the command or read the source. A promise in the README does not tick a box. This is what keeps the score honest — binary counting otherwise rewards documentation over behavior.
+2. **Agent-hostile beats arithmetic.** A category scores `0` when its core capability actively misleads an agent, however many boxes are ticked. A `--json` mode that interleaves a spinner into stdout is worse than no `--json` at all: the agent's parse fails silently. Eight ticks and a corrupt parse is a `0`, not a `1`.
+3. **N/A items leave the denominator. Unverified items do not.** N/A means the item does not apply to this product — no Docker, no plugins, no mutating operations. Say why. It never means "I could not check this." An item you were unable to verify stays **open**: it costs the box, and the audit's Confidence drops to record why. Otherwise every hard-to-check item quietly becomes N/A and the score inflates. If *every* item in a category is N/A, the category leaves the total too: the denominator drops by 2 — the same mechanism a pre-distribution target uses to report an agent-readiness score alongside the raw one.
+
+`1` does not mean "nearly there." It means **an agent cannot rely on this category.** One box ticked and eight boxes ticked both score `1`, and that is deliberate — the gradient between them was never reproducible across auditors. The written findings carry the detail; the number carries the verdict.
 
 | Total | Interpretation |
 |---:|---|

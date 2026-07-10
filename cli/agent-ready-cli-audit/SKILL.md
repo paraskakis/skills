@@ -51,7 +51,7 @@ After that, complete the entire audit without further questions. When anything i
 **Expected fallbacks (all fine — log them, lower confidence where noted):**
 - Source/tests not reasonably available (closed or large repo): score category 14 from inferred evidence and mark it low-confidence rather than cloning everything.
 - No web access: skip the docs-page fetch, note degraded confidence on docs-related items.
-- Clean-environment install can't be truly verified read-only: reason from package metadata and docs, mark as unverified.
+- Clean-environment install can't be truly verified read-only: reason from package metadata and docs, and leave the box **open** — unverified is not N/A, it costs the box and lowers Confidence. Say so rather than quietly reclassifying it.
 - Working directory not writable: save the report wherever writes are permitted and state the path.
 - Environment already authenticated as a real user: read-only commands are still fine; cite only the minimum account evidence needed (no token values, no scopes dumps beyond the finding).
 
@@ -92,7 +92,11 @@ Avoid destructive commands unless the user explicitly provides a safe test envir
 
 **Stopping rule:** don't `--help` every leaf of a large CLI. Sample until each checklist category has at least one piece of direct evidence, favoring the user's focus workflows; then stop.
 
-Completion criterion: audit distinguishes observed evidence from untested assumptions.
+**Run the agent test.** It is the checklist's central experiment, not an appendix — see "The agent test" in `references/agent-ready-cli-checklist-v2.md`. Drive the user's focus workflow yourself through discover → auth → inspect → plan → act → verify, using read-only commands, or a mutation behind `--dry-run` where the environment is safe. Record the transcript. This is the only evidence that ticks category 14's "agent eval is run" box; without it that category is capped at `1`, which is the honest outcome, not a bug.
+
+When the test genuinely cannot be run — the CLI is not installed, no safe environment, no credentials — leave the box open, drop Confidence, and say in the Verdict that the ceiling was set by audit conditions rather than by the CLI.
+
+Completion criterion: audit distinguishes observed evidence from untested assumptions, and either includes an agent-test transcript or states why none exists.
 
 ### 2. Score the checklist
 
@@ -101,6 +105,8 @@ Score each category per `references/agent-ready-cli-checklist-v2.md`:
 - `0` = missing or agent-hostile;
 - `1` = partial/unreliable/undocumented;
 - `2` = works, documented, and verified.
+
+**The mapping from checkboxes to that score is defined**, under "How to score a category" in the checklist. Follow it; do not invent one. All applicable items checked → `2`; none → `0`; anything in between → `1`. A box ticks only on evidence you gathered, never on a claim in the docs. An agent-hostile category scores `0` however many boxes are ticked. N/A items leave the denominator.
 
 Categories:
 
