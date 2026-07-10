@@ -3,7 +3,7 @@ name: agent-ready-cli-build
 description: "Implement, scaffold, or modify an agent-ready CLI in a repository. Takes a CLI spec, an OpenAPI file (preferred when wrapping an API), or requirements, and produces a git-initialized repo on disk ready to push: source code, executable metadata, passing tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), and a verification transcript. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-build' or asks to build or implement a CLI against an existing spec or repo; for the full idea-to-delivery pipeline (story + spec + build + audit) prefer agent-ready-cli-end-to-end. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.4.0"
+  version: "0.5.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -69,6 +69,8 @@ Unless the user explicitly asks to push/publish/submit, deliver:
 - package/project metadata updated (name, version, description, license, repository placeholder);
 - tests added and passing locally;
 - docs added/updated: `README.md` (quickstart, install, top workflows, auth setup, safety model, troubleshooting);
+- **an agent runbook** — `SKILL.md`, or `AGENTS.md` where that is the host convention. Not a second copy of the README's prose: compact, directly-invocable instructions that walk an agent through discover → authenticate → inspect → plan → act → verify for this CLI's real workflows, with the exact commands. The README is for a human deciding whether to use the tool; the runbook is for an agent already using it. Checklist category 15 scores this, and prose in a README does not satisfy it.
+- **an update check** — `tool update --check --json`, reporting installed version, latest version, whether an update is available, and the exact update command. Implement it once a distribution channel is chosen. When nothing is published yet, still add the command and have it report that no channel is configured — then say so in `DISTRIBUTION.md` rather than omitting the command. Checklist category 11 scores the capability, not the registry.
 - **`DISTRIBUTION.md`** — exact, copy-paste instructions for every relevant channel: npm (`npm publish` steps, `npx` usage, semver/tagging), Homebrew (formula or tap steps), pipx/uvx, GitHub Releases (binary + checksums), Docker if relevant. Instructions only — do not run publish commands;
 - verification transcript saved to `artifacts/agent-cli-eval.md`;
 - concise summary of changed files, commands run, and assumptions made.
@@ -169,6 +171,16 @@ discover → auth → inspect → plan → act → verify → summarize
 
 Save the transcript with actual commands and outputs to `artifacts/agent-cli-eval.md`.
 
+### 6. Self-check against the bundled checklist before declaring done
+
+`references/agent-ready-cli-checklist-v2.md` is the rubric this build will be scored against. Walk it, category by category, before you report finished. For each item: satisfied (name the evidence — a command you ran, a file you wrote), deferred (say why, e.g. no distribution channel chosen yet), or genuinely not applicable (say why).
+
+Do not skip the items this skill's deliverables list does not spell out. The deliverables are a floor, not the rubric. Anything the checklist scores and the build can satisfy, the build should satisfy — and where it does not, the final summary must say so rather than leave an auditor to discover it.
+
+Exercise the three `--json` parser-error paths here (unknown subcommand, unknown flag, missing required option). They are the most commonly missed item, they cannot be verified by reading, and a passing test suite does not imply they work — see `references/frameworks-and-implementation-guidance.md`.
+
+Completion criterion: every checklist category has a verdict with evidence, and unmet items appear in the summary under Assumptions rather than being discovered later by an audit.
+
 Completion criterion: final report cites actual commands and outputs, and states whether live API testing ran or was skipped.
 
 ## Submission Boundary
@@ -220,8 +232,12 @@ Next actions: [exact commands to test locally; publish steps are in DISTRIBUTION
 - [ ] Executable entrypoint is wired.
 - [ ] Tests pass without live credentials.
 - [ ] Docs are updated; `DISTRIBUTION.md` covers every relevant channel with copy-paste steps.
+- [ ] An agent runbook (`SKILL.md`/`AGENTS.md`) exists, distinct from the README, covering discover → auth → inspect → plan → act → verify with real commands.
+- [ ] `tool update --check --json` exists, and reports honestly when no distribution channel is configured.
 - [ ] `--help` and `--version` work.
-- [ ] `--json` output parses.
+- [ ] `--json` output parses — including for the framework's own parser errors: unknown subcommand, unknown flag, missing required option. Each emits a valid envelope and exits 2. Run all three; do not infer from a passing suite.
+- [ ] `E_INTERNAL` output carries `version`, and a report path where one exists.
+- [ ] Every checklist category has a verdict with evidence; unmet items are named in the summary.
 - [ ] stdout/stderr are separated.
 - [ ] Mutations have dry-run/confirm where applicable.
 - [ ] Verification command proves results.

@@ -122,6 +122,29 @@ Use this scheme unless the project already has a convention — don't invent a n
 
 Error output rules: human-readable message on stderr; in `--json` mode also emit a machine envelope `{"error": {"code": "E_NOT_FOUND", "message": "...", "hint": "..."}}`. Real APIs return 401/403/429 even when the OpenAPI file omits them — spec and implement these paths anyway, marked as inferred.
 
+**Crash-shaped errors carry two extra fields.** The envelope above is right for taxonomized failures the CLI expects — validation, auth, not-found, conflict, rate-limit. `E_INTERNAL` is different: it means something broke that nobody anticipated, and whoever hits it needs to file a bug. Add the installed version and a report path to that case only:
+
+```json
+{"error": {"code": "E_INTERNAL", "message": "...", "hint": "...",
+           "version": "1.2.3", "reportUrl": "https://github.com/<org>/<repo>/issues"}}
+```
+
+The version tells a maintainer which build produced the trace; the report path tells an agent where to send it. Use a route that actually exists — if the repo has no issues URL yet, omit `reportUrl` and say in the message where to report instead. Never invent a link. Routine errors do not carry these fields.
+
+**`--json` is a promise about stderr, not about your error handler.** It means *every byte the process writes to stderr is parseable JSON* — including errors the CLI framework emits before your code runs. This is the single easiest agent-readiness item to miss, because the tests you would naturally write all exercise your own error paths, which already work.
+
+Most frameworks print their own plain text and exit for: an unknown subcommand, an unknown flag, and a missing required option. That output never passes through your envelope. Verify by running each of these and piping stderr to a JSON parser:
+
+```bash
+tool bogus-subcommand --json          # unknown command
+tool tasks list --bogus-flag --json   # unknown flag
+tool tasks create --json              # required flag omitted
+```
+
+All three must emit a valid envelope with `E_USAGE` and exit 2. In Commander, reach this by disabling its own exit and writer (`exitOverride()`, and a `configureOutput` whose `writeErr` discards), catching the error it throws, and routing it through the same reporter as every other error. Other frameworks name it differently — argparse, cobra, and clap all have an equivalent hook. The rule is the same: your reporter is the only thing allowed to write to stderr.
+
+Test all three paths explicitly. A test named for JSON output that only exercises application errors will pass while the contract is broken.
+
 ## Testing without live credentials
 
 Tests must pass in a clean clone with no secrets set. Preferred pattern: start a local HTTP stub server inside the test suite and point the CLI's `--base-url`/`TOOL_BASE_URL` override at it — this exercises the real HTTP client and justifies the base-URL config existing at all. Caution: interception libraries like nock do not catch Node's native fetch (undici) by default; a real local server avoids the trap. Keep any live-API tests in a separate, optional test target gated on credential presence.

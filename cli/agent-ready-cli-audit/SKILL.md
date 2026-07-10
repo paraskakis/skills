@@ -3,7 +3,7 @@ name: agent-ready-cli-audit
 description: "Audit an existing CLI against the Agent-Ready CLI Checklist. Evidence-first: identifies the target command, runs it with --help and safe read-only commands, finds install instructions and the docs page, scores the checklist, and produces prioritized fixes. Use when user says '/agent-ready-cli-audit' or asks to audit a CLI, check whether a CLI is agent-ready, or review a CLI/repo/docs for agent readiness — including questions like 'is our CLI good for agents?' or 'why do coding agents get stuck with our tool?'. Does not design new commands."
 license: MIT
 metadata:
-  version: "0.4.0"
+  version: "0.5.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -120,6 +120,15 @@ Categories:
 14. Testing and release quality
 15. Agent onboarding package
 
+**Score against the checklist, never against another CLI.** If you have recently seen a sibling tool that went beyond the rubric, that extra feature is not the bar. Example: for a plain API-key scheme the checklist (category 7) says documented key acquisition plus `auth status` satisfies the item — a `set-token` command is a convenience, and its absence costs nothing.
+
+**Pre-distribution targets get two scores.** When the target is confirmed local-only — the user says so, or no install path resolves and no registry, tap, or release exists — categories 11 (updates) and 12 (distribution) measure a stage the product has not reached, not a defect in it. Report both numbers:
+
+- **Raw score, out of 30.** Scored honestly on real evidence. Nothing is inflated.
+- **Agent-readiness score**, with the stage-blocked categories removed from the denominator (e.g. `22/24`), and a one-line note saying which categories were deferred and why.
+
+Drive the Verdict from the agent-readiness score when the target is pre-distribution; otherwise from the raw score. Never silently drop the raw number, and never mark 11/12 as N/A — "not shipped yet" is a fact about today, while N/A is a fact about the product forever.
+
 Completion criterion: each score has evidence and a fix.
 
 ### 3. Identify agent blockers
@@ -160,8 +169,11 @@ Save the full report to a file (default `agent-ready-cli-audit-<tool>.md` in the
 ## Verdict
 
 Status: Agent-ready / Mostly ready / Partially ready / Human-only CLI / Wrong surface
-Score: N/30
+Score: N/30 (raw)
+Agent-readiness: N/M [omit unless pre-distribution; name the deferred categories and why]
+Stage: published / pre-distribution (local-only)
 Confidence: high/medium/low based on evidence available
+Independence: independent audit / self-audit of a CLI this same run built [see pitfall 9]
 
 ## Target
 
@@ -207,6 +219,10 @@ Command: ... | Version: ... | Install path: ... | Docs page: ...
 4. **Ignoring tests.** Agent-readiness should be testable, not just documented.
 5. **Inventing command contracts during audit.** Audit first; spec redesign second.
 6. **Interrogating the user.** One consolidated question round at most; then run to completion.
+7. **Reading a low 11/12 as brokenness.** An unpublished CLI legitimately scores low on updates and distribution. Score it honestly, then report the agent-readiness score alongside, and say in the Verdict how many lost points are stage-expected versus real gaps.
+8. **Trusting a test's name over what it asserts.** "23/23 passing" and "the tests cover what their names claim" are different facts. Before crediting a category on test evidence, open at least one test and read what it actually asserts. A test called "`--json` is valid on success and error paths" that never passes `--json` proves nothing.
+9. **Auditing your own build without saying so.** When the same run that built the CLI also scores it, the audit is not independent — it inherits the build's blind spots and tends to score high. Re-derive every claim by executing commands, never by trusting the build phase's own summary. State plainly in the Verdict that this is a self-audit, and recommend an independent `agent-ready-cli-audit` run before the score is quoted anywhere.
+10. **Scoring against a sibling CLI instead of the rubric.** Another tool exceeding the checklist does not raise the bar. Cite the checklist item, not the comparison.
 
 ## Verification Checklist
 

@@ -83,9 +83,45 @@ compare "rmoa lint"           design-api design-api-spec \
 compare "report + preview"    design-api design-api-spec \
   '^## Step [0-9]+: Report' '^(#+ Key Principles|---)$'
 
+# ---------------------------------------------------------------------------
+# Whole-file duplicates.
+#
+# The CLI skills bundle reference docs verbatim — the checklist in all five, the
+# frameworks guidance in three. Same reason as the API blocks: a skill installs
+# as a standalone directory and cannot reach a sibling. Every copy must match.
+# ---------------------------------------------------------------------------
+
+# identical <label> <relative-path-under-each-skill> <skill-dir> ...
+identical() {
+  local label=$1 rel=$2; shift 2
+  local first="" ref=""
+  for d in "$@"; do
+    local f="$d/$rel"
+    if [ ! -f "$f" ]; then
+      printf '  \033[31mERROR\033[0m %-22s missing: %s\n' "$label" "$f"; fail=1; return
+    fi
+    if [ -z "$first" ]; then first=$f; ref=$(md5 -q "$f" 2>/dev/null || md5sum "$f" | cut -d' ' -f1); continue; fi
+    local h; h=$(md5 -q "$f" 2>/dev/null || md5sum "$f" | cut -d' ' -f1)
+    if [ "$h" != "$ref" ]; then
+      printf '  \033[31mDRIFT\033[0m %-22s %s\n' "$label" "$f"
+      diff "$first" "$f" | head -20 | sed 's/^/          /'
+      fail=1; return
+    fi
+  done
+  printf '  \033[32mOK\033[0m    %-22s %s copies identical\n' "$label" "$#"
+}
+
+CLI=cli
+identical "cli checklist" references/agent-ready-cli-checklist-v2.md \
+  $CLI/agent-ready-cli-story $CLI/agent-ready-cli-spec $CLI/agent-ready-cli-build \
+  $CLI/agent-ready-cli-audit $CLI/agent-ready-cli-end-to-end
+
+identical "cli frameworks doc" references/frameworks-and-implementation-guidance.md \
+  $CLI/agent-ready-cli-spec $CLI/agent-ready-cli-build $CLI/agent-ready-cli-end-to-end
+
 echo
 if [ $fail -eq 0 ]; then
-  echo "All shared blocks in sync."
+  echo "All shared blocks and bundled reference docs in sync."
 else
   echo "Drift found. Apply the edit to every copy, then re-run." >&2
 fi
