@@ -3,7 +3,7 @@ name: agent-ready-cli-audit
 description: "Audit an existing CLI against the Agent-Ready CLI Checklist. Evidence-first: identifies the target command, runs it with --help and safe read-only commands, finds install instructions and the docs page, scores the checklist, and produces prioritized fixes. Use when user says '/agent-ready-cli-audit' or asks to audit a CLI, check whether a CLI is agent-ready, or review a CLI/repo/docs for agent readiness — including questions like 'is our CLI good for agents?' or 'why do coding agents get stuck with our tool?'. Does not design new commands."
 license: MIT
 metadata:
-  version: "0.3.2"
+  version: "0.4.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -36,7 +36,17 @@ Triggering is defined in the frontmatter description. In scope: evidence-based r
 | Safe environment | No | Whether mutating commands may be exercised. Default: no — read-only commands only. |
 | Credentials | No | Env var names for auth'd commands. Never ask the user to paste secrets into the conversation; ask for names of env vars already set in the shell. |
 
-**Gather inputs once, then run unattended.** If the target CLI is named in the request, skip questions entirely — proceed straight to Step 0 with the table's defaults for everything else. Only if the target is missing, ask ONE consolidated question: "Which CLI should I audit? Give me the command name (plus repo path or docs URL if you have them). Should I stick to read-only commands?" After that, complete the entire audit without further questions. When anything is ambiguous mid-run, choose the safe option (read-only), log the assumption in the report, and continue.
+**The target can arrive as a command name, a path on disk, a package name, a docs URL, or a GitHub repo.** Never go looking on disk and report what you found there.
+
+**Gather inputs once, then run unattended.** If the target CLI is named in the request, skip questions entirely — proceed straight to Step 0 with the table's defaults for everything else.
+
+Only if the target is missing, ask once, like a person. Do not announce that a directory is empty, do not cite these instructions:
+
+> Which CLI should I look at? A command name, a repo path, a package name, or a docs URL — whatever you've got.
+>
+> Also: is it safe to run commands that change things, or should I stick to read-only? (Read-only is my default.)
+
+After that, complete the entire audit without further questions. When anything is ambiguous mid-run, choose the safe option (read-only), log the assumption in the report, and continue.
 
 **Expected fallbacks (all fine — log them, lower confidence where noted):**
 - Source/tests not reasonably available (closed or large repo): score category 14 from inferred evidence and mark it low-confidence rather than cloning everything.

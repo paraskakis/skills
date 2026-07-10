@@ -3,7 +3,7 @@ name: agent-ready-cli-spec
 description: "Turn CLI workflow stories, requirements, or an OpenAPI spec into an exact agent-ready command contract: command tree, grammar, flags, config precedence, auth, JSON schemas, stdin/stdout/stderr, dry-run/confirm behavior, verification commands, errors, exit codes, tests, and docs. Asks for requirements if none are given; OpenAPI file is the preferred input when the CLI wraps an API. Use when user says '/agent-ready-cli-spec' or asks to design a CLI command contract or write a CLI spec. Design only — not implementation."
 license: MIT
 metadata:
-  version: "0.3.2"
+  version: "0.4.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -37,12 +37,17 @@ Triggering is defined in the frontmatter description. In scope: designing the ex
 | Requirements | One of these three | Plain-language description of actors and workflows; the skill will state story-level assumptions. |
 | CLI name | No | Proposed binary name. Default: derive from the product/API title. |
 
-If none of the three are provided, ask ONE consolidated question round:
+**Any input can arrive as a path on disk, a URL, a GitHub repo, or text pasted into the conversation.** Never go looking on disk and report what you found there.
 
-> 1. What should this CLI do, and for whom (human dev, local coding agent, CI agent)?
-> 2. Do you have an OpenAPI file for the underlying API (preferred)? Or workflow stories/requirements I should work from?
-> 3. For the top workflows: do any change data (create/update/delete), and how would success be verified?
-> 4. Any constraints (auth, environments, compliance)? Any preferred CLI name?
+### Opening ask (only when you have none of the three)
+
+Ask once, like a person. Do not announce that a directory is empty, do not cite these instructions, do not explain what the skill requires — just ask:
+
+> Do you have an OpenAPI file for the API this wraps, or workflow stories or requirements I can work from? Send them whichever way is easiest — a path on disk, a link, a GitHub repo, or just paste them here.
+>
+> If you don't have anything written down, no problem — let's talk it through. What should this CLI do, and who's going to use it: you at a terminal, a coding agent, CI, or all three?
+
+If they have no files, **have the conversation** — that *is* the input round. Cover these, in plain sentences, a couple at a time, and only as far as they can answer: what the tool does and for whom; whether an API sits underneath and whether they have its OpenAPI file; which of the top workflows change data, and how success would be verified; constraints around auth, environments, and compliance; any preferred CLI name. Never present it as a numbered questionnaire.
 
 **Then run unattended.** After inputs are in hand, produce the complete spec without pausing. Log every inference (especially anything derived from the OpenAPI file) under Assumptions in the output — including fields the question round could not gather (side-effect levels, success evidence) that you inferred per workflow.
 
@@ -58,6 +63,12 @@ When an OpenAPI file is the input:
 - map `servers` to base-URL config (`--base-url` flag > `TOOL_BASE_URL` env var > config file > spec default);
 - derive error behavior even when the OpenAPI file omits it: real APIs return 401/403/429 whether or not the spec documents them — include standard auth/rate-limit error codes and mark them as inferred. Use the default exit-code and error-code table in `references/frameworks-and-implementation-guidance.md` unless the user has a convention;
 - group endpoints into workflows before designing commands — the CLI is not a 1:1 endpoint mirror; skip or merge endpoints that don't serve a workflow, and record that decision.
+
+**A placeholder `servers` URL is normal — never stop over one.** Treat these as placeholders: `example.com`/`example.org`, `localhost`/`127.0.0.1`, unresolved templates (`{host}`, `{environment}`), and obvious stubs (`TODO`, `CHANGEME`, `your-api-here`). A placeholder is *not* a missing input and *not* an error. Keep it as the documented spec default, make the base URL configurable per the precedence above, and ask once, in passing:
+
+> The spec's server URL looks like a placeholder (`https://api.example.com`). What's the real base URL? Happy to skip it — I'll use the spec's and note the assumption.
+
+Proceed either way. When the URL is a placeholder, live-endpoint validation is skipped — say so under Assumptions rather than treating it as a failure.
 
 **Read-only APIs:** if the spec has no mutating operations, say so explicitly. Dry-run/confirm/verify-after-mutation sections become "N/A — read-only" (stated, not silently skipped); verification means re-fetching state.
 

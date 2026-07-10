@@ -3,7 +3,7 @@ name: agent-ready-cli-story
 description: "Define what an agent-ready CLI should expose before writing commands: actors, environments, jobs-to-be-done, product-surface fit, workflow stories, success evidence, and non-goals. Accepts requirements and/or an OpenAPI spec as input and asks for requirements if missing. Use when user says '/agent-ready-cli-story' or asks what CLI to build, which workflows a CLI should expose, or whether CLI/API/MCP/Skill/UI is the right surface. Does not produce implementation code."
 license: MIT
 metadata:
-  version: "0.3.2"
+  version: "0.4.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -35,14 +35,19 @@ Triggering is defined in the frontmatter description. In scope: deciding which w
 | OpenAPI spec | One of these two — **preferred when the CLI wraps an API** | Operations reveal candidate workflows; `securitySchemes` reveal auth constraints; `servers` reveal environments. |
 | Existing docs/product context | No | Product docs, existing CLI/API docs, competitor notes. |
 
-If neither requirements nor an OpenAPI spec is provided, ask ONE consolidated question round:
+**Any input can arrive as a path on disk, a URL, a GitHub repo, or text pasted into the conversation.** Never go looking on disk and report what you found there.
 
-> 1. Who is the primary actor (human dev, local coding agent, CI agent, chat assistant)?
-> 2. What jobs should the tool do (top 3 workflows)?
-> 3. Is there an existing API underneath — and do you have its OpenAPI file?
-> 4. Any constraints (auth, environments, compliance, destructive operations)?
+### Opening ask (only when you have neither requirements nor an OpenAPI file)
 
-**Then run unattended.** After the input round, produce the complete story document without further questions. If only an OpenAPI file was given, derive requirements from it (operations → jobs, securitySchemes → auth constraints) and log every inference under Assumptions. Note: an OpenAPI file describes the API, not the calling agent's environment — in OpenAPI-only mode, default the actor/environment profile to "local coding agent + CI, shell/network/env-var capable" and log that as an assumption.
+Ask once, like a person. Do not announce that a directory is empty, do not cite these instructions, do not explain what the skill requires — just ask:
+
+> Do you have an OpenAPI file or some written requirements for this? Send them whichever way is easiest — a path on disk, a link, a GitHub repo, or just paste them here.
+>
+> If you don't have anything written down, no problem — let's talk it through. What do you want this CLI to do, and who's going to use it: you at a terminal, a coding agent, CI, or all three?
+
+If they have no files, **have the conversation** — that *is* the input round. Cover these, in plain sentences, a couple at a time, and only as far as they can answer: the primary actor (human dev, local coding agent, CI agent, chat assistant); the top three jobs the tool should do; whether an API sits underneath, and whether they have its OpenAPI file; constraints around auth, environments, compliance, and destructive operations. Never present it as a numbered questionnaire.
+
+**Then run unattended.** Once inputs are in hand, go quiet and produce the complete story document without further questions. If only an OpenAPI file was given, derive requirements from it (operations → jobs, securitySchemes → auth constraints) and log every inference under Assumptions. Note: an OpenAPI file describes the API, not the calling agent's environment — in OpenAPI-only mode, default the actor/environment profile to "local coding agent + CI, shell/network/env-var capable" and log that as an assumption.
 
 ## Workflow
 

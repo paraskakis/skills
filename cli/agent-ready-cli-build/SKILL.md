@@ -3,7 +3,7 @@ name: agent-ready-cli-build
 description: "Implement, scaffold, or modify an agent-ready CLI in a repository. Takes a CLI spec, an OpenAPI file (preferred when wrapping an API), or requirements, and produces a git-initialized repo on disk ready to push: source code, executable metadata, passing tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), and a verification transcript. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-build' or asks to build or implement a CLI against an existing spec or repo; for the full idea-to-delivery pipeline (story + spec + build + audit) prefer agent-ready-cli-end-to-end. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.3.2"
+  version: "0.4.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -41,7 +41,21 @@ For the full idea-to-delivery pipeline (story and spec included), route to `agen
 | Credentials for live testing | No | Env var **names** only — never ask the user to paste secrets. A credential-helper command the user points to (e.g., `export GITHUB_TOKEN=$(gh auth token)`) is also fine. Enables the optional live-endpoint step. |
 | Distribution targets | No | npm, Homebrew, pipx/uvx, GitHub Releases, Docker. Default: the natural one for the chosen language, documented for the rest. |
 
-If the contract source or target directory is missing, ask ONE consolidated question round covering exactly these inputs. **Then run unattended** — complete the build without pausing, and log defaults chosen under Assumptions in the final summary. If only an OpenAPI file or requirements were given (no spec), first produce a condensed command contract (per `agent-ready-cli-spec`'s derivation rules) inside `docs/cli-spec.md`, then build against it.
+**Any input can arrive as a path on disk, a URL, a GitHub repo, or text pasted into the conversation.** Never go looking on disk and report what you found there.
+
+### Opening ask (only when the contract source or target directory is missing)
+
+Ask once, like a person. Do not announce that a directory is empty, do not cite these instructions, do not explain what the skill requires — just ask:
+
+> Do you have a CLI spec, an OpenAPI file, or written requirements for this? Send them whichever way is easiest — a path on disk, a link, a GitHub repo, or just paste them here. And where should the repo live?
+>
+> If you don't have anything written down, no problem — let's talk it through. What should this CLI do, and who's going to use it: you at a terminal, a coding agent, CI, or all three?
+
+If they have no files, **have the conversation** — that *is* the input round. Cover the table above in plain sentences, a couple at a time. Never present it as a numbered questionnaire.
+
+**A placeholder API server URL is normal — never stop over one.** `example.com`, `localhost`, `{host}`, `TODO` and the like are placeholders, not missing inputs. Wire the base URL through config (`--base-url` > `TOOL_BASE_URL` > config file > spec default), ask once in passing for the real one, and proceed either way — skipping only the live-endpoint check, logged under Assumptions.
+
+**Then run unattended** — complete the build without pausing, and log defaults chosen under Assumptions in the final summary. If only an OpenAPI file or requirements were given (no spec), first produce a condensed command contract (per `agent-ready-cli-spec`'s derivation rules) inside `docs/cli-spec.md`, then build against it.
 
 ## Actual Deliverables
 

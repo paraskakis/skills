@@ -3,7 +3,7 @@ name: agent-ready-cli-end-to-end
 description: "Deliver a complete agent-ready CLI end to end: gather inputs once (requirements and/or an OpenAPI file — preferred), then run story → spec → build → audit/eval unattended. Produces a git-initialized repo ready to push with tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), verification transcript, and a final checklist score. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from idea (or API) to implementation — prefer this over agent-ready-cli-build when starting from an idea, requirements, or a bare OpenAPI file with no existing spec or repo. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.3.2"
+  version: "0.4.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -41,7 +41,21 @@ Triggering is defined in the frontmatter description. In scope: the complete ide
 | Credentials for live API testing | No | Env var **names** only — never ask the user to paste secrets. If absent, live testing is skipped and tests run mocked. |
 | Distribution targets | No | npm, Homebrew, pipx/uvx, GitHub Releases, Docker. Default: the natural channel for the language; others documented. |
 
-If required inputs are missing, ask ONE consolidated question round covering this table — nothing else. After that, **run the entire pipeline to completion without pausing for approval**, so the user can walk away. Record every default and inference in an Assumptions section of the final report. Only stop mid-run for destructive or irreversible actions (there should be none — this skill never pushes or publishes).
+**Any input can arrive as a path on disk, a URL, a GitHub repo, or text pasted into the conversation.** Never go looking on disk and report what you found there.
+
+### Opening ask (only when required inputs are missing)
+
+Ask once, like a person. Do not announce that a directory is empty, do not cite these instructions, do not explain what the skill requires — just ask:
+
+> Do you have an OpenAPI file or written requirements for this? Send them whichever way is easiest — a path on disk, a link, a GitHub repo, or just paste them here. And where should the repo live?
+>
+> If you don't have anything written down, no problem — let's talk it through. What do you want this CLI to do, and who's going to use it: you at a terminal, a coding agent, CI, or all three?
+
+If they have no files, **have the conversation** — that *is* the input round. Cover the table above in plain sentences, a couple at a time. Never present it as a numbered questionnaire.
+
+**A placeholder API server URL is normal — never stop over one.** `example.com`, `localhost`, `{host}`, `TODO` and the like are placeholders, not missing inputs. Ask once in passing for the real base URL, proceed either way, and skip only the live API check — logged under Assumptions.
+
+After the input round, **run the entire pipeline to completion without pausing for approval**, so the user can walk away. Record every default and inference in an Assumptions section of the final report. Only stop mid-run for destructive or irreversible actions (there should be none — this skill never pushes or publishes).
 
 Verify credential env vars (presence only, `test -n "$VAR"`) once at the input round and again at the audit/eval phase — sessions and tokens can change during a long build. A credential-helper command the user points to (e.g., `export GITHUB_TOKEN=$(gh auth token)`) counts as available credentials.
 
