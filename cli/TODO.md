@@ -31,3 +31,17 @@ This is a stronger agent-onboarding pattern than anything currently in the check
 
 - [ ] **`agent-ready-cli-spec` / `agent-ready-cli-build`**: when a generated/modified CLI is (or could be) npm-distributed, verify and enforce that `package.json` has exactly one `bin` entry (or, if multiple binaries are genuinely needed, document the `npx --package=<name> <bin>` invocation explicitly in the README/`--help` output) so that bare `npx <package-name>` — the zero-install path checklist item 12 already asks for — actually works out of the box, not just "in theory." Add this as an explicit build-verification step (e.g., `npx <package>@latest --version` as a smoke test) rather than assuming a `bin` field alone is sufficient.
 - [ ] **`agent-ready-cli-audit`**: when scoring checklist item 12 ("zero-install path exists"), don't just check for the *existence* of an npx-style example in docs — actually run `npx <package>@latest --help` live where possible and confirm it resolves to something useful, since a missing/misconfigured `bin` field would otherwise go undetected by docs review alone.
+
+## Companion-skill install line cannot resolve pre-publication (Jul 9, 2026)
+
+Both `agent-ready-cli-build` and `agent-ready-cli-end-to-end` tell the builder to record `npx skills add <owner>/<repo>` in `DISTRIBUTION.md`, and `build`'s Verification Checklist asserts the line "has been checked to resolve." **Pre-publication it cannot resolve** — the repo is unpushed.
+
+Found by two INDEPENDENT auditors, on two separately-built CLIs, neither prompted to look for it (checklist item 15.9). See the vault record `two-way-build-experiment-2026-07-09.md`.
+
+This is the Agentmail failure in miniature: its bundled `SKILL.md` is repo-only, not in the npm package, so no agent outside the repo can reach it.
+
+Fix candidates:
+1. Emit a local install line (`npx skills add ./`) until a repo exists; record the published line as a documented TODO in `DISTRIBUTION.md`.
+2. Apply the honesty rule `update --check --json` already follows — report that no channel is configured rather than printing a line that 404s.
+
+Either way, `build`'s Verification Checklist item must stop asserting a check that cannot pass at that stage.
