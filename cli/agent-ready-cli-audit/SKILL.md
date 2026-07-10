@@ -3,7 +3,7 @@ name: agent-ready-cli-audit
 description: "Audit an existing CLI against the Agent-Ready CLI Checklist. Evidence-first: identifies the target command, runs it with --help and safe read-only commands, finds install instructions and the docs page, scores the checklist, and produces prioritized fixes. Use when user says '/agent-ready-cli-audit' or asks to audit a CLI, check whether a CLI is agent-ready, or review a CLI/repo/docs for agent readiness — including questions like 'is our CLI good for agents?' or 'why do coding agents get stuck with our tool?'. Does not design new commands."
 license: MIT
 metadata:
-  version: "0.5.0"
+  version: "0.6.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -49,9 +49,9 @@ Only if the target is missing, ask once, like a person. Do not announce that a d
 After that, complete the entire audit without further questions. When anything is ambiguous mid-run, choose the safe option (read-only), log the assumption in the report, and continue.
 
 **Expected fallbacks (all fine — log them, lower confidence where noted):**
-- Source/tests not reasonably available (closed or large repo): score category 14 from inferred evidence and mark it low-confidence rather than cloning everything.
+- Source/tests not reasonably available (closed or large repo): fail category 14's boxes you could not verify, mark the audit low-confidence, and say so — do not clone everything, and do not reclassify them as N/A.
 - No web access: skip the docs-page fetch, note degraded confidence on docs-related items.
-- Clean-environment install can't be truly verified read-only: reason from package metadata and docs, and leave the box **open** — unverified is not N/A, it costs the box and lowers Confidence. Say so rather than quietly reclassifying it.
+- Clean-environment install can't be truly verified read-only: that item is *(not scored)*, so it costs nothing. Report what package metadata and docs imply, as an observation.
 - Working directory not writable: save the report wherever writes are permitted and state the path.
 - Environment already authenticated as a real user: read-only commands are still fine; cite only the minimum account evidence needed (no token values, no scopes dumps beyond the finding).
 
@@ -92,21 +92,27 @@ Avoid destructive commands unless the user explicitly provides a safe test envir
 
 **Stopping rule:** don't `--help` every leaf of a large CLI. Sample until each checklist category has at least one piece of direct evidence, favoring the user's focus workflows; then stop.
 
-**Run the agent test.** It is the checklist's central experiment, not an appendix — see "The agent test" in `references/agent-ready-cli-checklist-v2.md`. Drive the user's focus workflow yourself through discover → auth → inspect → plan → act → verify, using read-only commands, or a mutation behind `--dry-run` where the environment is safe. Record the transcript. This is the only evidence that ticks category 14's "agent eval is run" box; without it that category is capped at `1`, which is the honest outcome, not a bug.
+**Run the agent test.** It is the checklist's central experiment, not an appendix — see "The agent test" in `references/agent-ready-cli-checklist-v2.md`. Drive the user's focus workflow yourself through discover → auth → inspect → plan → act → verify, using read-only commands, or a mutation behind `--dry-run` where the environment is safe. Record the transcript.
 
-When the test genuinely cannot be run — the CLI is not installed, no safe environment, no credentials — leave the box open, drop Confidence, and say in the Verdict that the ceiling was set by audit conditions rather than by the CLI.
+The test scores no box of its own — "Agent eval is run before claiming agent-readiness" is a claim about the team's process and is *(not scored)*. Run it anyway: it is the cheapest way to gather evidence for the [C] gates, which nothing else exercises end to end. A gate you never drove is a gate you cannot pass.
+
+When the test genuinely cannot be run — the CLI is not installed, no safe environment, no credentials — say so, drop Confidence, and note in the Verdict that the gates were assessed from source rather than from behaviour.
 
 Completion criterion: audit distinguishes observed evidence from untested assumptions, and either includes an agent-test transcript or states why none exists.
 
 ### 2. Score the checklist
 
-Score each category per `references/agent-ready-cli-checklist-v2.md`:
+Score per `references/agent-ready-cli-checklist-v2.md`, under "How to score". Follow it; do not invent a scheme.
 
-- `0` = missing or agent-hostile;
-- `1` = partial/unreliable/undocumented;
-- `2` = works, documented, and verified.
+**Every box is worth one point. Score = passed ÷ scored, as a percentage.** 130 boxes; 4 are *(not scored)* and never counted; 126 scorable before N/A.
 
-**The mapping from checkboxes to that score is defined**, under "How to score a category" in the checklist. Follow it; do not invent one. All applicable items checked → `2`; none → `0`; anything in between → `1`. A box ticks only on evidence you gathered, never on a claim in the docs. An agent-hostile category scores `0` however many boxes are ticked. N/A items leave the denominator.
+- A box passes **only on evidence you gathered** — a command you ran, a file you read. A claim in the README passes nothing.
+- **N/A leaves the denominator; unverified does not.** N/A means the item cannot apply to this product. It never means "I could not check it." An item you could not verify **fails**, costs the box, and lowers Confidence. N/A is the only lever that moves the denominator — justify every use of it, per item.
+- **The 9 boxes marked [C] are gates.** They score one point like any other, but failing any one caps the Verdict at *Partially ready*, whatever the percentage. So does an agent-hostile category, which additionally scores zero across all its boxes.
+
+**The percentage is completion; the Verdict is agent-readiness.** They are different claims. A polished human CLI can tick most of 130 boxes and still fail every gate, because the things that break an agent's loop are a small share of the count. Never let a high percentage imply an agent can drive the tool — that is what the gates are for. Report both, and say which gates failed.
+
+Because N/A varies per CLI, denominators vary. **Compare percentages across tools, never raw counts.**
 
 Categories:
 
@@ -130,8 +136,8 @@ Categories:
 
 **Pre-distribution targets get two scores.** When the target is confirmed local-only — the user says so, or no install path resolves and no registry, tap, or release exists — categories 11 (updates) and 12 (distribution) measure a stage the product has not reached, not a defect in it. Report both numbers:
 
-- **Raw score, out of 30.** Scored honestly on real evidence. Nothing is inflated.
-- **Agent-readiness score**, with the stage-blocked categories removed from the denominator (e.g. `22/24`), and a one-line note saying which categories were deferred and why.
+- **Raw score.** Passed ÷ scored, honestly, on real evidence. Nothing is inflated.
+- **Agent-readiness score**, with categories 11 and 12 removed from the denominator — 17 scorable boxes, leaving 109 before any other N/A — and a one-line note saying which categories were deferred and why.
 
 Drive the Verdict from the agent-readiness score when the target is pre-distribution; otherwise from the raw score. Never silently drop the raw number, and never mark 11/12 as N/A — "not shipped yet" is a fact about today, while N/A is a fact about the product forever.
 
@@ -175,11 +181,16 @@ Save the full report to a file (default `agent-ready-cli-audit-<tool>.md` in the
 ## Verdict
 
 Status: Agent-ready / Mostly ready / Partially ready / Human-only CLI / Wrong surface
-Score: N/30 (raw)
-Agent-readiness: N/M [omit unless pre-distribution; name the deferred categories and why]
+Score: N/M scored items = P% [M = 126 minus N/A; state the N/A count]
+Agent-readiness: N/M = P% [omit unless pre-distribution; name the deferred categories and why]
+Critical gates: N/9 passed — [name every failed [C] gate; any failure caps the Verdict at Partially ready]
+Not scored: 4 process/future claims, reported below as observations, never as points
 Stage: published / pre-distribution (local-only)
 Confidence: high/medium/low based on evidence available
 Independence: independent audit / self-audit of a CLI this same run built [see pitfall 9]
+
+> The percentage is checklist completion, not a safety measure. It does not mean an agent
+> will succeed P% of the time, and the missing share is not necessarily minor.
 
 ## Target
 

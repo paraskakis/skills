@@ -71,7 +71,7 @@ If the agent cannot prove what changed, the workflow is not agent-ready.
 
 ## 4. Noninteractive automation path
 
-- [ ] Core workflows can run without a TTY.
+- [ ] **[C]** Core workflows can run without a TTY.
 - [ ] Interactive prompts have flag/env/config alternatives.
 - [ ] Confirmation flags are explicit: `--confirm`, `--yes`, or equivalent.
 - [ ] The CLI never hangs invisibly waiting for input in automation mode.
@@ -83,10 +83,10 @@ If the agent cannot prove what changed, the workflow is not agent-ready.
 ## 5. Machine-readable I/O
 
 - [ ] `--json` is available for inspect/action commands.
-- [ ] JSON output is valid JSON and parseable without stripping banners, spinners, or progress text.
+- [ ] **[C]** JSON output is valid JSON and parseable without stripping banners, spinners, or progress text.
 - [ ] JSON schemas are stable across versions or versioned explicitly.
-- [ ] Primary data/result output goes to stdout.
-- [ ] Errors, warnings, progress, diagnostics, and logs go to stderr.
+- [ ] **[C]** Primary data/result output goes to stdout.
+- [ ] **[C]** Errors, warnings, progress, diagnostics, and logs go to stderr.
 - [ ] Human formatting does not break machine parsing.
 - [ ] Color can be disabled with `--no-color` and/or `NO_COLOR`.
 - [ ] Spinners/progress bars degrade gracefully when stdout is not a TTY.
@@ -117,7 +117,7 @@ tool projects list --json | jq '.projects[].id'
 - [ ] Env-var auth is supported where appropriate, e.g. `ACME_API_KEY`.
 - [ ] Config-file auth is documented.
 - [ ] `auth login` exists for humans where auth is interactive (OAuth/browser flows). For plain API-key schemes, documented key acquisition plus `auth status` satisfies this item.
-- [ ] `auth status --json` exists for agents.
+- [ ] **[C]** `auth status --json` exists for agents.
 - [ ] Missing, expired, and insufficient credentials fail differently and clearly.
 - [ ] Required scopes/permissions are documented.
 - [ ] Secret handling avoids printing tokens in stdout/stderr/logs/debug output.
@@ -126,7 +126,7 @@ tool projects list --json | jq '.projects[].id'
 ## 8. Inspectability and verification
 
 - [ ] Every action has a way to inspect current state before acting.
-- [ ] Every action has a way to verify the result after acting.
+- [ ] **[C]** Every action has a way to verify the result after acting.
 - [ ] `get`, `status`, `list`, `logs`, `history`, or equivalent commands exist where relevant.
 - [ ] Verification commands support `--json`.
 - [ ] Mutating commands return resource IDs that can be checked later.
@@ -135,7 +135,7 @@ tool projects list --json | jq '.projects[].id'
 
 ## 9. Safe side effects
 
-- [ ] Destructive commands require explicit confirmation.
+- [ ] **[C]** Destructive commands require explicit confirmation.
 - [ ] `--dry-run`, `plan`, or equivalent is available before meaningful side effects.
 - [ ] Dry-run output is specific enough to predict what will change.
 - [ ] Production-impacting commands are clearly marked and require explicit environment/target selection.
@@ -146,8 +146,8 @@ tool projects list --json | jq '.projects[].id'
 
 ## 10. Errors, recovery, and exit codes
 
-- [ ] Exit codes are meaningful and documented: `0` means success; nonzero means failure or a documented alternate outcome.
-- [ ] The CLI avoids “error text with exit 0.”
+- [ ] **[C]** Exit codes are meaningful and documented: `0` means success; nonzero means failure or a documented alternate outcome.
+- [ ] **[C]** The CLI avoids “error text with exit 0.”
 - [ ] Error messages say what happened.
 - [ ] Error messages explain how to fix it.
 - [ ] Errors include stable, searchable error codes where useful, e.g. `E_AUTH_MISSING`, `E_NOT_FOUND`.
@@ -166,7 +166,7 @@ tool projects list --json | jq '.projects[].id'
 - [ ] If a newer version exists, output includes the exact update command.
 - [ ] Update notices are machine-readable with `--json` where possible.
 - [ ] Stale-version warnings do not hide command output or change successful command exit semantics.
-- [ ] Breaking changes follow semver or an equivalent compatibility policy.
+- [ ] Breaking changes follow semver or an equivalent compatibility policy. *(not scored)*
 - [ ] Deprecated commands/flags include a migration path before removal.
 
 Example:
@@ -192,7 +192,7 @@ tool update --check --json
 - [ ] Update command is documented for every distribution path.
 - [ ] Install instructions work in a clean environment.
 - [ ] Package distribution is documented: npm/npx, Homebrew, pipx, Docker, GitHub Releases, etc.
-- [ ] Package footprint is small enough for the expected use case, especially if invoked through `npx`/zero-install paths.
+- [ ] Package footprint is small enough for the expected use case, especially if invoked through `npx`/zero-install paths. *(not scored)*
 - [ ] Runtime requirements are explicit, e.g. Node/Python/Go binary/platform support.
 - [ ] Cross-platform support or constraints are documented.
 - [ ] The CLI handles cancellation/signals (`CTRL+C`, `SIGINT`, `SIGTERM`) cleanly.
@@ -220,8 +220,8 @@ tool update --check --json
 - [ ] Tests cover dry-run/plan and explicit confirmation.
 - [ ] Tests cover verification commands after mutation.
 - [ ] Tests avoid brittle locale-dependent assertions or lock locale explicitly.
-- [ ] Clean-environment install is tested before release.
-- [ ] Agent eval is run before claiming agent-readiness.
+- [ ] Clean-environment install is tested before release. *(not scored)*
+- [ ] Agent eval is run before claiming agent-readiness. *(not scored)*
 
 ## 15. Agent onboarding package
 
@@ -270,42 +270,42 @@ Watch for:
 
 If the agent gets stuck, the problem may not be the model. It may be your CLI UX.
 
-**The agent test is not optional colour — it is the evidence for two boxes.** Category 14's "Agent eval is run before claiming agent-readiness" ticks only when this test was actually run, and category 15's "The docs include an agent evaluation prompt" ticks only when a tailored prompt ships with the CLI. An audit that never runs the test leaves the first box open, which caps category 14 at `1` — correctly. "Verified" cannot be claimed for a category whose central test nobody executed.
+**The agent test is not optional colour — it is how the [C] gates get evidence.** It scores no box of its own: "Agent eval is run before claiming agent-readiness" is a claim about the team's process, and is *(not scored)*. But the nine gates — a TTY-free path, parseable `--json`, stream separation, `auth status --json`, verification after acting, confirmation before destruction, meaningful exit codes — are only observable by driving the loop. Category 15's "The docs include an agent evaluation prompt" is a different item, and passes when a tailored prompt ships with the CLI.
 
-Run it against the user's focus workflow wherever the CLI is installed and a safe path exists: read-only commands, or a mutation with `--dry-run`. When it genuinely cannot be run — the CLI is not installed, no safe environment exists, no credentials — leave the box open, lower Confidence, and say in the Verdict that the ceiling was set by audit conditions rather than by the CLI. Never silently omit it.
+Run it against the user's focus workflow wherever the CLI is installed and a safe path exists: read-only commands, or a mutation with `--dry-run`. When it genuinely cannot be run — the CLI is not installed, no safe environment exists, no credentials — say so, lower Confidence, and note in the Verdict that the gates were judged from source rather than from behaviour. Never silently omit it.
 
 ---
 
 # Scoring rubric
 
-Score each section:
+Every box is worth one point. Score = passed ÷ scored (applicable) items.
 
-- `0` = missing or actively agent-hostile.
-- `1` = partially present but unreliable or undocumented.
-- `2` = works, documented, and verified.
+## How to score
 
-## How to score a category
+**Score = passed ÷ scored, expressed as a percentage.** Every box is worth one point. There are no category scores to aggregate and no weights to argue about. The model is the one CIS Benchmarks use: count what passed, out of what was in scope. See `SCORING.md` in the repository root for why.
 
-The checkboxes are the input; the `0/1/2` is the output. Count them, don't weigh them:
+Four rules decide what is in scope and what passed.
 
-- **All applicable items checked → `2`.**
-- **No applicable items checked → `0`.**
-- **Anything in between → `1`.** There is no fourth score, so nothing here is left to the auditor's discretion.
+1. **A box passes on evidence, not on claims.** Tick it when you ran the command or read the source. A promise in the README does not tick a box. Without this, counting rewards documentation over behavior.
 
-Three rules govern what "checked" means:
+2. **Not-scored items are never counted.** Items marked *(not scored)* assert something about the team's process or the product's future — no auditor can observe them by running commands. They are excluded from the denominator permanently, for every CLI. Report them as observations, never as points.
 
-1. **A box ticks on evidence, not on claims.** Tick it when you ran the command or read the source. A promise in the README does not tick a box. This is what keeps the score honest — binary counting otherwise rewards documentation over behavior.
-2. **Agent-hostile beats arithmetic.** A category scores `0` when its core capability actively misleads an agent, however many boxes are ticked. A `--json` mode that interleaves a spinner into stdout is worse than no `--json` at all: the agent's parse fails silently. Eight ticks and a corrupt parse is a `0`, not a `1`.
-3. **N/A items leave the denominator. Unverified items do not.** N/A means the item does not apply to this product — no Docker, no plugins, no mutating operations. Say why. It never means "I could not check this." An item you were unable to verify stays **open**: it costs the box, and the audit's Confidence drops to record why. Otherwise every hard-to-check item quietly becomes N/A and the score inflates. If *every* item in a category is N/A, the category leaves the total too: the denominator drops by 2 — the same mechanism a pre-distribution target uses to report an agent-readiness score alongside the raw one.
+3. **N/A items leave the denominator. Unverified items do not.** N/A means the item does not apply to this product: no Docker, no plugins, no mutating operations, no stdin-consuming commands. Say why, per item. It never means "I could not check this." An item you were unable to verify this run stays **failed**: it costs the box, and Confidence drops to record why. Otherwise every awkward item quietly becomes N/A and the score inflates. N/A is the only lever that moves the denominator, so it is the only one worth auditing.
 
-`1` does not mean "nearly there." It means **an agent cannot rely on this category.** One box ticked and eight boxes ticked both score `1`, and that is deliberate — the gradient between them was never reproducible across auditors. The written findings carry the detail; the number carries the verdict.
+4. **Critical boxes are gates, not points.** Items marked **[C]** are worth one point like any other — but failing any of them caps the Verdict at *Partially ready*, whatever the percentage says. A CLI cannot buy its way past a broken `--json` contract with a long tail of documentation. Separately, a category whose core capability is **actively agent-hostile** — a `--json` mode that interleaves a spinner into stdout, corrupting the parse rather than merely omitting data — scores zero across that category's boxes and caps the Verdict the same way. Hostile is worse than absent, and arithmetic cannot say so.
 
-| Total | Interpretation |
+**What the percentage means, and does not.** It is a completion measure: the share of scored, applicable items this CLI passes. It is not a safety measure and not a measure of importance. 80% does not mean an agent will succeed 80% of the time, and it does not mean the remaining 20% is minor — "should this even be a CLI?" is six boxes out of 130. Read the findings for what is wrong; read the number for how much is done.
+
+Because N/A varies per CLI, denominators vary. **Compare percentages, never raw counts.**
+
+| Score | Interpretation |
 |---:|---|
-| 0–10 | Not an agent-ready CLI. Human-only or prototype surface. |
-| 11–20 | Basic CLI exists, but agents will need human help or brittle guessing. |
-| 21–24 | Good classic CLI, incomplete agent-readiness. |
-| 25–28 | Mostly agent-ready; fix remaining safety/verification gaps. |
-| 29–30 | Strong agent-ready CLI candidate. Run agent evals before public claim. |
+| 0–33% | Not an agent-ready CLI. Human-only or prototype surface. |
+| 34–66% | Basic CLI exists, but agents will need human help or brittle guessing. |
+| 67–80% | Good classic CLI, incomplete agent-readiness. |
+| 81–93% | Mostly agent-ready; fix remaining safety/verification gaps. |
+| 94–100% | Strong agent-ready CLI candidate. Run agent evals before public claim. |
 
-Note: scoring 15 categories at 0–2 gives 30 possible points. Weight sections 4, 5, 8, 9, 10, and 15 higher for agent-critical workflows if you need a stricter rubric.
+**A failed [C] gate caps the Verdict at "Partially ready" regardless of the band.** So does an agent-hostile category. The band describes how much is done; the gates describe whether an agent can actually complete the loop.
+
+There are **130 boxes**. Four are *(not scored)*, leaving **126 scorable** before any N/A. Categories 11 and 12 hold 19 boxes between them; a confirmed pre-distribution CLI defers both and reports a second percentage over the remaining scorable items, naming the deferral.

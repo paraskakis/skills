@@ -49,7 +49,7 @@ Without these, the skills still generate a complete OpenAPI spec.
 - **agent-ready-cli-build** — Implements or modifies a CLI in a repo. Produces a git-initialized, ready-to-push repo: code, executable metadata, passing tests, docs, `DISTRIBUTION.md`, and a verification transcript.
 - **agent-ready-cli-end-to-end** — Orchestrates story → spec → build → audit/eval for a complete delivery package, unattended after one input round.
 
-All five gather their inputs once, up front, then run to completion so you can walk away. They score against a shared **Agent-Ready CLI Checklist**, bundled with each skill at `<skill>/references/agent-ready-cli-checklist-v2.md`.
+All five gather their inputs once, up front, then run to completion so you can walk away. They score against a shared **Agent-Ready CLI Checklist**, bundled with each skill at `<skill>/references/agent-ready-cli-checklist-v2.md`. How that checklist becomes a number — and what the number does not claim — is in [`SCORING.md`](./SCORING.md).
 
 ### Inputs
 
