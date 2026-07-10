@@ -62,3 +62,19 @@ Fix — add to Step 0 (Identify and onboard the target):
 4. Never score a stale binary silently. Record the audited version, its source, and its checksum in the report header.
 
 Also worth a checklist item on the other side of the contract: a CLI should make its own version and update status machine-readable (`--version --json`, `update --check --json`), which is what lets an auditor — or an agent — notice the gap at all. That item already exists in category 11; this is the auditor-side mirror of it.
+
+## Candidate checklist item: provides a sandbox / disposable test environment (Jul 10, 2026)
+
+**Proposed item:** *"The CLI offers a one-command way to get a working, isolated, non-production test environment — ideally with no account required and safe to mutate."*
+
+**Why it belongs on the checklist.** Auth is the single most common agent blocker in the field (top-10 re-audit, Jul 2026: 4 of 10 ship no machine-readable `auth status`; the #1 failure is "an agent can't tell whether it's authenticated"). A CLI that hands the agent a throwaway authenticated sandbox removes the question instead of answering it — and lets the agent run the full act → verify loop (create, mutate, delete) without ever touching production data.
+
+**The exemplar — Stripe CLI** (`docs.stripe.com/stripe-cli/install`, "Get started without an account"; captured in the vault at `reference/stripe-cli-agent-detection-2026-07-10.md`):
+```bash
+stripe sandbox create --from-git --non-interactive   # working TEST keys, no account, no human
+```
+Returns test keys (`rkcs_test_…` / `pk_test_…`), saved to the CLI profile so every later command is authenticated; `--non-interactive` is documented specifically for agents; expires in 7 days; `stripe sandbox claim` converts to a real account. Docs say verbatim it "enables you, a coding agent, or an automated workflow to start building … immediately."
+
+**Where it might live:** category 4 (Noninteractive automation) or 15 (Agent onboarding) as a scored item; possibly a partial-credit line ("test/sandbox mode reachable non-interactively" = partial; "no-account sandbox in one command" = full). Not every CLI can offer no-account sandboxes (some wrap infra that inherently needs real auth), so it likely can't be a `[C]` gate — score it, or mark N/A with a reason where the product genuinely can't provide one.
+
+**Status:** candidate only. Decide during the next checklist revision whether it's scored, and at what weight. Do not add silently — it changes denominators.
