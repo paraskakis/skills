@@ -45,3 +45,20 @@ Fix candidates:
 2. Apply the honesty rule `update --check --json` already follows — report that no channel is configured rather than printing a line that 404s.
 
 Either way, `build`'s Verification Checklist item must stop asserting a check that cannot pass at that stage.
+
+## The audit skill never checks whether the binary is current (Jul 9, 2026)
+
+`agent-ready-cli-audit` locates the command (`which <tool>`), runs `--version`, and scores whatever it finds. **It never asks whether that is the release a user would install today.**
+
+Caught live: a Jul 9 run scored the `kubectl` on PATH at 64.4%, 7/9 gates, failing the `auth status --json` gate and the destructive-confirmation gate. That binary was `v1.16.6-beta.0`, built 2020-01-15. Current stable was `v1.36.2`. Re-audited against v1.36.2: **72.0%, 9/9 gates.** Both "failures" had been fixed years earlier — `kubectl auth whoami -o json` exists, and `delete` has `--interactive`, `--force`/`--grace-period`, and `--dry-run`.
+
+The report was not merely stale. It was **defamatory in two specific, checkable ways**, and nothing in the skill would have caught it.
+
+Fix — add to Step 0 (Identify and onboard the target):
+
+1. Resolve the latest published version from the distribution channel: `npm view <pkg> version`, `dl.k8s.io/release/stable.txt`, GitHub Releases `/latest`, `brew info`, PyPI JSON.
+2. Compare against the installed binary's `--version`.
+3. If they differ, either fetch the current release (preferred — scratch dir, checksum-verified) **or** state the gap prominently in the Verdict, lower Confidence, and label every finding as version-locked.
+4. Never score a stale binary silently. Record the audited version, its source, and its checksum in the report header.
+
+Also worth a checklist item on the other side of the contract: a CLI should make its own version and update status machine-readable (`--version --json`, `update --check --json`), which is what lets an auditor — or an agent — notice the gap at all. That item already exists in category 11; this is the auditor-side mirror of it.
