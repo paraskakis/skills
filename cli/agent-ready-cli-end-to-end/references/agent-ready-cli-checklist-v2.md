@@ -233,6 +233,7 @@ tool update --check --json
 - [ ] Side-effect/destructive-command safeguards are explicit.
 - [ ] A Skill/runbook exists that teaches agents how to use the CLI.
 - [ ] The Skill/runbook includes the inspect → plan → act → verify loop.
+- [ ] The Skill is installable in one command (e.g. `npx skills add <owner>/<repo>`), not only a file inside the repo. An agent that is not already working in the repo will never find a file it cannot install.
 - [ ] The docs include an agent evaluation prompt.
 
 ---

@@ -97,7 +97,7 @@ Use the `agent-ready-cli-build` pattern:
 - implement repo-on-disk changes; wire executable/package metadata;
 - **git init** (if needed), `.gitignore`, and meaningful local commits at milestones — scaffold, commands, tests, docs; never push;
 - add tests that pass without live credentials (mock the API);
-- write `README.md`, an **agent runbook** (`SKILL.md`/`AGENTS.md` — distinct from the README, walking an agent through discover → auth → inspect → plan → act → verify with real commands), and **`DISTRIBUTION.md`** with copy-paste publish instructions for npm/Homebrew/pipx/GitHub Releases as relevant — instructions only, no publishing;
+- write `README.md`, an **installable companion skill** (root `SKILL.md` in agentskills format, so an agent in the repo reads it in place and every other agent gets it via `npx skills add <owner>/<repo>` — workflows as exact commands, auth check, mutating commands with their dry-run form, a verification command each; not a README copy), and **`DISTRIBUTION.md`** with copy-paste publish instructions for npm/Homebrew/pipx/GitHub Releases as relevant — instructions only, no publishing;
 - add `tool update --check --json`; when no channel is published yet, have it report that none is configured rather than omitting the command;
 - run test suite and smoke tests (`--help`, `--version`, stdout/stderr separation, and `--json` parseability **including the framework's own parser errors** — unknown subcommand, unknown flag, missing required option; see `references/frameworks-and-implementation-guidance.md`);
 - before declaring the build done, walk `references/agent-ready-cli-checklist-v2.md` and give every category a verdict with evidence; unmet items go in Assumptions, not left for the audit phase to find.
@@ -142,7 +142,7 @@ Commits: [paste `git log --oneline`]
 - Spec: docs/cli-spec.md
 - Implementation: ...
 - Tests: ... (N passing)
-- Docs: README.md, agent runbook (SKILL.md/AGENTS.md), DISTRIBUTION.md
+- Docs: README.md, installable companion skill (root SKILL.md), DISTRIBUTION.md (including the skill's install line)
 - Eval transcript: artifacts/agent-cli-eval.md
 - Audit: artifacts/agent-ready-cli-audit.md
 
@@ -192,7 +192,7 @@ Do not push, publish, open PRs, or release unless explicitly asked. `DISTRIBUTIO
 - [ ] Spec artifact saved.
 - [ ] Repo implementation exists; git initialized with milestone commits; nothing pushed.
 - [ ] Tests pass without live credentials.
-- [ ] README.md, the agent runbook (distinct from the README), and DISTRIBUTION.md are complete.
+- [ ] README.md, the installable companion skill (root `SKILL.md`, resolves via `npx skills add`), and DISTRIBUTION.md are complete.
 - [ ] `--json` parses for the framework's own parser errors (unknown subcommand, unknown flag, missing required option) — all three run, not inferred.
 - [ ] Every checklist category has a verdict with evidence; the report states this was a self-audit.
 - [ ] Agent eval transcript saved; live API check performed or skip recorded.

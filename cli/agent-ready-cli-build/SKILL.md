@@ -69,9 +69,13 @@ Unless the user explicitly asks to push/publish/submit, deliver:
 - package/project metadata updated (name, version, description, license, repository placeholder);
 - tests added and passing locally;
 - docs added/updated: `README.md` (quickstart, install, top workflows, auth setup, safety model, troubleshooting);
-- **an agent runbook** — `SKILL.md`, or `AGENTS.md` where that is the host convention. Not a second copy of the README's prose: compact, directly-invocable instructions that walk an agent through discover → authenticate → inspect → plan → act → verify for this CLI's real workflows, with the exact commands. The README is for a human deciding whether to use the tool; the runbook is for an agent already using it. Checklist category 15 scores this, and prose in a README does not satisfy it.
+- **an installable companion skill** — `SKILL.md` at the repo root, in [Agent Skills](https://agentskills.io) format, so it serves both discovery paths from one file: an agent already working in the repo reads it in place, and every other agent gets it via `npx skills add <owner>/<repo>`. A runbook nobody can install is invisible to an agent that is not already in your repo, which is most of them.
+  - Frontmatter: `name` (lowercase, hyphens, matching the CLI), and a `description` that says what the CLI does **and when to reach for it** — the description is the only part an agent reads before deciding to load the skill.
+  - Body: the four or five workflows that matter, as exact commands, not prose. How to confirm authentication before starting. Which commands mutate, and their dry-run form. The verification command for each workflow, because a zero exit code is not evidence the thing happened.
+  - Not a second copy of the README. The README is for a human deciding whether to adopt the tool; the skill is for an agent already driving it. Duplicated prose costs the agent context and tells it nothing.
+  - Record the install line in `DISTRIBUTION.md` next to `npm publish`, and check the skill loads (`npx skills add <path-or-repo> --list`) before declaring done.
 - **an update check** — `tool update --check --json`, reporting installed version, latest version, whether an update is available, and the exact update command. Implement it once a distribution channel is chosen. When nothing is published yet, still add the command and have it report that no channel is configured — then say so in `DISTRIBUTION.md` rather than omitting the command. Checklist category 11 scores the capability, not the registry.
-- **`DISTRIBUTION.md`** — exact, copy-paste instructions for every relevant channel: npm (`npm publish` steps, `npx` usage, semver/tagging), Homebrew (formula or tap steps), pipx/uvx, GitHub Releases (binary + checksums), Docker if relevant. Instructions only — do not run publish commands;
+- **`DISTRIBUTION.md`** — exact, copy-paste instructions for every relevant channel: npm (`npm publish` steps, `npx` usage, semver/tagging), Homebrew (formula or tap steps), pipx/uvx, GitHub Releases (binary + checksums), Docker if relevant. Instructions only — do not run publish commands. Include the companion skill's one-line install (`npx skills add <owner>/<repo>`) alongside the package channels;
 - verification transcript saved to `artifacts/agent-cli-eval.md`;
 - concise summary of changed files, commands run, and assumptions made.
 
@@ -232,7 +236,7 @@ Next actions: [exact commands to test locally; publish steps are in DISTRIBUTION
 - [ ] Executable entrypoint is wired.
 - [ ] Tests pass without live credentials.
 - [ ] Docs are updated; `DISTRIBUTION.md` covers every relevant channel with copy-paste steps.
-- [ ] An agent runbook (`SKILL.md`/`AGENTS.md`) exists, distinct from the README, covering discover → auth → inspect → plan → act → verify with real commands.
+- [ ] An installable companion skill exists: root `SKILL.md`, agentskills frontmatter, workflows as exact commands, auth check, mutating commands marked with their dry-run form, a verification command per workflow. Distinct from the README. Its one-line install is in `DISTRIBUTION.md` and has been checked to resolve.
 - [ ] `tool update --check --json` exists, and reports honestly when no distribution channel is configured.
 - [ ] `--help` and `--version` work.
 - [ ] `--json` output parses — including for the framework's own parser errors: unknown subcommand, unknown flag, missing required option. Each emits a valid envelope and exits 2. Run all three; do not infer from a passing suite.
