@@ -1,6 +1,6 @@
 ---
 name: agent-ready-cli-build
-description: "Implement, scaffold, or modify an agent-ready CLI in a repository. Takes a CLI spec, an OpenAPI file (preferred when wrapping an API), or requirements, and produces a git-initialized repo on disk ready to push: source code, executable metadata, passing tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), and a verification transcript. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-build' or asks to build or implement a CLI against an existing spec or repo; for the full idea-to-delivery pipeline (story + spec + build + audit) prefer agent-ready-cli-end-to-end. Does not push, publish, or submit unless explicitly requested."
+description: "Implement, scaffold, or modify an agent-ready CLI in a repository. Use when user says '/agent-ready-cli-build' or asks to build or implement a CLI from an existing spec, an OpenAPI file, or requirements. Produces a git-initialized repo on disk with source, tests, docs, and distribution instructions. For the full idea-to-delivery pipeline (story, spec, build, audit) prefer agent-ready-cli-end-to-end. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
   version: "0.7.0"
