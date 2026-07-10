@@ -1,9 +1,9 @@
 ---
 name: agent-ready-cli-end-to-end
-description: "Deliver a complete agent-ready CLI end to end: gather inputs once (requirements and/or an OpenAPI file — preferred), then run story → spec → build → audit/eval unattended. Produces a git-initialized repo ready to push with tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), verification transcript, and a final checklist score. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from idea (or API) to implementation — prefer this over agent-ready-cli-build when starting from an idea, requirements, or a bare OpenAPI file with no existing spec or repo. Does not push, publish, or submit unless explicitly requested."
+description: "Deliver a complete agent-ready CLI end to end: gather inputs once (requirements and/or an OpenAPI file — preferred), then run story → spec → build → audit/eval unattended. Produces a git-initialized repo ready to push with tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), verification transcript, and critical-gate results. Claims no checklist score — run agent-ready-cli-audit independently for that. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from idea (or API) to implementation — prefer this over agent-ready-cli-build when starting from an idea, requirements, or a bare OpenAPI file with no existing spec or repo. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -19,7 +19,7 @@ Pipeline:
 gather inputs → story → spec → build → audit/eval
 ```
 
-The output is a complete delivery package: workflow story, CLI spec, git-ready repo-on-disk implementation, tests, docs, distribution instructions, verification transcript, and final audit score.
+The output is a complete delivery package: workflow story, CLI spec, git-ready repo-on-disk implementation, tests, docs, distribution instructions, verification transcript, and critical-gate results. It claims no checklist score — that comes from an independent `agent-ready-cli-audit` run.
 
 ## Included References
 
@@ -102,6 +102,8 @@ Use the `agent-ready-cli-build` pattern:
 - run test suite and smoke tests (`--help`, `--version`, stdout/stderr separation, and `--json` parseability **including the framework's own parser errors** — unknown subcommand, unknown flag, missing required option; see `references/frameworks-and-implementation-guidance.md`);
 - before declaring the build done, walk `references/agent-ready-cli-checklist-v2.md` and give every category a verdict with evidence; unmet items go in Assumptions, not left for the audit phase to find.
 
+**You are building the best tool for the people and agents who will use it. You are not building for the checklist.** The checklist is a compass, not a destination — it exists because it usually points at what those users need, and it is wrong whenever it does not. Where following an item would make this CLI worse, do the better thing and record the deviation with its reason. Never add a flag nobody will use in order to satisfy a line: a `--plain` mode on a CLI with no tabular output is noise. Never drop a capability to dodge an item you might not satisfy perfectly — a CLI that removes stdin support has not improved, whatever any number says. The score is direction, never a target, and this skill is deliberately given no number to reach.
+
 Output: git-ready repo state.
 
 Completion criterion: local tests and smoke tests pass; history is reviewable.
@@ -110,16 +112,26 @@ Completion criterion: local tests and smoke tests pass; history is reviewable.
 
 Use the `agent-ready-cli-audit` pattern after building:
 
-**This phase scores work this same run produced — it is a self-audit, and self-audits score high.** Re-derive every claim by executing commands; never credit a category from the build phase's own summary. Read what a test asserts before crediting it — a passing suite is not evidence that the test covers what its name says. State in the report that this is a self-audit, and recommend an independent `agent-ready-cli-audit` run before the score is quoted anywhere. If the CLI is not yet published, report the raw score (passed ÷ scored, as a percentage) *and* an agent-readiness score with categories 11 and 12 removed from the denominator, naming them as deferred rather than failed. State how many of the 9 critical [C] gates passed — a failed gate caps the verdict regardless of the percentage.
+**This phase does NOT produce a checklist score.** It would be grading work this same run produced, and a self-audit scores high. The number also depends on N/A judgements — deciding an item does not apply shrinks the denominator and lifts the percentage — and the run that built the CLI is the last one that should be adjudicating its own omissions.
+
+The number is therefore decoupled. Report **observations, not a grade**:
+
+- the **agent eval transcript** — the loop driven with real commands;
+- the **nine critical [C] gates**, each pass or fail, with the command that proved it. A gate is a binary fact reproducible in one command, not an aggregation over judgement calls. That is why this phase may report them and may not report a percentage;
+- **remaining gaps**, named plainly, each tied to the checklist item it misses.
+
+End the delivery report with: *"No score is claimed. Run `agent-ready-cli-audit` independently before quoting a number anywhere."*
+
+Re-derive every claim by executing commands; never credit anything from the build phase's own summary. Read what a test asserts before crediting it — a passing suite is not evidence that the test covers what its name says.
 
 - run the agent eval loop (discover → auth → inspect → plan → act → verify → summarize) with real commands;
 - **optional live API check**: if credentials env vars are set and the server URL is real, run auth status plus one read-only command against the live API; otherwise record the skip;
-- score the checklist; identify remaining gaps;
+- run the nine [C] gates; identify remaining gaps;
 - save transcripts.
 
-Output: `artifacts/agent-cli-eval.md` and `artifacts/agent-ready-cli-audit.md` in the target repo.
+Output: `artifacts/agent-cli-eval.md` and `artifacts/agent-ready-cli-gates.md` in the target repo.
 
-Completion criterion: final report states score, evidence, remaining gaps, and delivery status.
+Completion criterion: final report states gate results, evidence, remaining gaps, and delivery status — and claims no score.
 
 ## Final Output Format
 
@@ -150,9 +162,12 @@ Commits: [paste `git log --oneline`]
 
 [real commands]
 
-## Final audit score
+## Critical gates
 
-N/M scored = P%, plus critical-gate result (N/9)
+N/9 passed. [name every failed gate and the command that proved it]
+
+**No checklist score is claimed.** This was a self-audit of a CLI this run built.
+Run `agent-ready-cli-audit` independently before quoting a number.
 
 ## Live API check
 
@@ -196,5 +211,5 @@ Do not push, publish, open PRs, or release unless explicitly asked. `DISTRIBUTIO
 - [ ] `--json` parses for the framework's own parser errors (unknown subcommand, unknown flag, missing required option) — all three run, not inferred.
 - [ ] Every checklist category has a verdict with evidence; the report states this was a self-audit.
 - [ ] Agent eval transcript saved; live API check performed or skip recorded.
-- [ ] Post-build audit score saved.
+- [ ] Gate results saved; no score claimed; independent audit recommended in the report.
 - [ ] Final status and next actions are clear.

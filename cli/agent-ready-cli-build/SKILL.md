@@ -3,7 +3,7 @@ name: agent-ready-cli-build
 description: "Implement, scaffold, or modify an agent-ready CLI in a repository. Takes a CLI spec, an OpenAPI file (preferred when wrapping an API), or requirements, and produces a git-initialized repo on disk ready to push: source code, executable metadata, passing tests, docs, distribution instructions (npm, Homebrew, pipx, etc.), and a verification transcript. Optionally tests live API endpoints when credentials are available. Use when user says '/agent-ready-cli-build' or asks to build or implement a CLI against an existing spec or repo; for the full idea-to-delivery pipeline (story + spec + build + audit) prefer agent-ready-cli-end-to-end. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -177,7 +177,9 @@ Save the transcript with actual commands and outputs to `artifacts/agent-cli-eva
 
 ### 6. Self-check against the bundled checklist before declaring done
 
-`references/agent-ready-cli-checklist-v2.md` is the rubric this build will be scored against. Walk it, category by category, before you report finished. For each item: satisfied (name the evidence — a command you ran, a file you wrote), deferred (say why, e.g. no distribution channel chosen yet), or genuinely not applicable (say why).
+**You are building the best tool for the people and agents who will use it. You are not building for the checklist.** The checklist is a compass, not a destination — it exists because it usually points at what those users need, and it is wrong whenever it does not. Where following an item would make this CLI worse, do the better thing and record the deviation with its reason. Never add a flag nobody will use in order to satisfy a line: a `--plain` mode on a CLI with no tabular output is noise. Never drop a capability to dodge an item you might not satisfy perfectly — a CLI that removes stdin support has not improved, whatever any number says. The score is direction, never a target, and this skill is deliberately given no number to reach.
+
+`references/agent-ready-cli-checklist-v2.md` is the rubric this build will be scored against. Walk it, category by category, before you report finished. For each item: satisfied (name the evidence — a command you ran, a file you wrote), deferred (say why, e.g. no distribution channel chosen yet), or genuinely not applicable (say why — never because it was inconvenient to satisfy).
 
 Do not skip the items this skill's deliverables list does not spell out. The deliverables are a floor, not the rubric. Anything the checklist scores and the build can satisfy, the build should satisfy — and where it does not, the final summary must say so rather than leave an auditor to discover it.
 
