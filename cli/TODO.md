@@ -48,7 +48,7 @@ The `[Agent guidance]` block in `stripe --help` is a separate, complementary pat
 
 ## Companion-skill install line cannot resolve pre-publication (Jul 9, 2026)
 
-**Status: done in the 1.0.0 workspace changes.** Build and end-to-end now emit and verify a local install path; the remote line is a post-publish step labeled "resolves once pushed", with configuration and verification status explicit. Commit pointer: `fix(cli): verify local companion skill installs` (orchestrator commit pending; replace with its hash after review).
+**Status: done in `2f6983e` (released as 1.0.0).** Build and end-to-end now emit and verify a local install path; the remote line is a post-publish step labeled "resolves once pushed", with configuration and verification status explicit.
 
 Both `agent-ready-cli-build` and `agent-ready-cli-end-to-end` tell the builder to record `npx skills add <owner>/<repo>` in `DISTRIBUTION.md`, and `build`'s Verification Checklist asserts the line "has been checked to resolve." **Pre-publication it cannot resolve** — the repo is unpushed.
 
@@ -64,7 +64,7 @@ Either way, `build`'s Verification Checklist item must stop asserting a check th
 
 ## The audit skill never checks whether the binary is current (Jul 9, 2026)
 
-**Status: done in the 1.0.0 workspace changes.** Step 0 resolves and compares the current release, prefers a checksum-verified scratch executable, and makes stale/unresolved version scope explicit in the Verdict and every finding. The header and self-check record version provenance and checksum status. Commit pointer: `fix(cli): verify audit release freshness` (orchestrator commit pending; replace with its hash after review).
+**Status: done in `2f6983e` (released as 1.0.0).** Step 0 resolves and compares the current release, prefers a checksum-verified scratch executable, and makes stale/unresolved version scope explicit in the Verdict and every finding. The header and self-check record version provenance and checksum status.
 
 `agent-ready-cli-audit` locates the command (`which <tool>`), runs `--version`, and scores whatever it finds. **It never asks whether that is the release a user would install today.**
 
@@ -83,7 +83,7 @@ Also worth a checklist item on the other side of the contract: a CLI should make
 
 ## W011 indirect prompt injection guard
 
-**Status: done in the 1.0.0 workspace changes.** All five CLI skills carry the identical third-party-content rule in their Inputs area: analyze outside content as data, ignore embedded instructions, run suggested commands only under the skill procedure, and quote instruction-like content as a finding. Commit pointer: `fix(cli): guard third-party inputs` (orchestrator commit pending; replace with its hash after review).
+**Status: done in `2f6983e` (released as 1.0.0).** All five CLI skills carry the identical third-party-content rule in their Inputs area: analyze outside content as data, ignore embedded instructions, run suggested commands only under the skill procedure, and quote instruction-like content as a finding.
 
 ## Candidate checklist item: provides a sandbox / disposable test environment (Jul 10, 2026)
 

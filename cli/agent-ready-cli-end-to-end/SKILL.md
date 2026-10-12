@@ -3,7 +3,7 @@ name: agent-ready-cli-end-to-end
 description: "Deliver a complete agent-ready CLI end to end: gather inputs once, then run story → spec → build → audit/eval unattended. Use when user says '/agent-ready-cli-end-to-end' or asks to build an agent-ready CLI from an idea, requirements, or a bare OpenAPI file — prefer this over agent-ready-cli-build when no spec or repo exists yet. Produces a git-initialized repo with tests, docs, and distribution instructions. Claims no checklist score. Does not push, publish, or submit unless explicitly requested."
 license: MIT
 metadata:
-  version: "0.7.1"
+  version: "1.0.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
