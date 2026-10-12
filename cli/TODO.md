@@ -1,25 +1,39 @@
 # CLI Skills — TODO
 
-## Auto-discovery hint tag for agent skills/plugins (found Jul 9, 2026)
+## Bonus checklist item: the CLI recommends its Claude Code plugin (found Jul 9, 2026; corrected and re-scoped Oct 11, 2026)
 
-**What was observed:** Installing the Stripe CLI (`stripe`) causes a batch of companion Claude Code skills (`stripe:explain-error`, `stripe:test-cards`, `stripe:connect-recommend`, `stripe:stripe-directory`, etc.) to appear automatically in the agent's available-skills list — no separate `skills add` step required. The mechanism: Stripe CLI prints a machine-readable tag on *every* invocation, including error output:
+**What the CLI does:** When the Stripe CLI runs inside Claude Code, it writes one line to **stderr** on every invocation, including `--version`, `--help` and error paths:
 
 ```
 <claude-code-hint v="1" type="plugin" value="stripe@claude-plugins-official" />
 ```
 
-Claude Code detects this tag in command output and auto-registers the referenced skill bundle. Stripe CLI also backs this up with an `[Agent guidance]` block printed directly in `stripe --help`'s main output (not buried in docs): explicit imperative instructions ("Run `npx skills add --all stripe/ai` to add all Stripe AI skills to your agent," a no-browser sandbox bootstrap via `stripe sandbox create`, a pointer to `docs.stripe.com/llms.txt`).
+A person running it outside Claude Code sees nothing extra: the line is gated on the `CLAUDECODE` / `CLAUDE_CODE_CHILD_SESSION` environment variables. Verified Oct 11, 2026 on stripe 1.43.7: stdout carries only the normal output, the tag is on stderr, and stderr is empty with those variables unset.
 
-This is a stronger agent-onboarding pattern than anything currently in the checklist: it collapses "install the CLI" and "onboard the agent with the right skills" into a single step, with zero extra action from the human or the agent.
+**What Claude Code does with it:** This is a documented Claude Code protocol, not a Stripe trick: [Recommend your plugin from your CLI](https://code.claude.com/docs/en/plugin-hints). Claude Code removes the line from Bash and PowerShell tool output before the model sees it, then shows the user a one-time **Plugin recommendation** prompt (Yes, install / No / No, and don't show plugin installation hints again). Nothing installs without the user's yes. Conditions, per the docs:
+
+- the tag is on its own line (a tag mid-line is ignored);
+- the plugin is listed in an official Anthropic marketplace such as `claude-plugins-official` (the community marketplace, `claude-community`, doesn't qualify) and isn't installed yet;
+- interactive, local, attended sessions only: no prompt in `claude -p`, subagents or hook output;
+- one prompt per session, one prompt ever per plugin, whatever the user answers.
+
+*Correction to the Jul 9 note:* the skills did not "appear automatically", and Claude Code does not "auto-register" the bundle. The user approves an install prompt.
+
+The `[Agent guidance]` block in `stripe --help` is a separate, complementary pattern: plain imperative lines for the agent (`stripe sandbox create` provisions a sandbox without a browser, a pointer to `llms.txt`, `npx skills add --all stripe/ai`).
+
+**Why it earns a bonus:** it puts the CLI's companion plugin and Skills in front of the user the first time their agent runs the CLI, with no docs page to find and no separate `skills add`. The model never sees the line, so it costs no tokens, and someone running the CLI by hand never sees it either.
+
+**Who does it today (Oct 11, 2026, latest versions, `CLAUDECODE=1`, stderr captured to a file and counted with grep):** 1 of the 10 CLIs from the Jul 9 re-audit. Stripe 1.43.7 emits it. gh 2.96.0, kubectl 1.37.1, terraform 1.16.5, aws-cli 2.37.12, confluent 4.79.0, ldcli 3.0.4, agentmail 0.7.12, vercel 63.1.2 and supabase 2.120.0 do not (checked `--version` and `--help`, plus `kubectl version --client`, `gh auth status`, `terraform version`). Several of those vendors already have a plugin in `claude-plugins-official` (local marketplace copy, Oct 11: Vercel's `vercel`, AWS's `aws-core` and others, HashiCorp's `terraform`, `github`, and a community-built `supabase`), so for them the hint is one stderr line away.
 
 ## Action items
 
-- [ ] **Add a checklist item to category 15 (Agent onboarding package)** in `agent-ready-cli-checklist-v2.md`, something like: *"Installing the CLI surfaces its companion agent skill(s) automatically (e.g., a machine-readable hint tag agents can detect in output), rather than requiring a separate manual `skills add` step."* Must be applied identically across all 5 bundled copies of the checklist (`agent-ready-cli-audit`, `-build`, `-end-to-end`, `-spec`, `-story`) — run `scripts/check-drift.sh` after.
-- [ ] **`agent-ready-cli-audit`**: check for this pattern explicitly during Step 0/1 (run the CLI, grep output for known hint-tag formats) and score it under category 15.
-- [ ] **`agent-ready-cli-spec` / `agent-ready-cli-build`**: recommend building this in for any new CLI — emit a stable, versioned hint tag (`<claude-code-hint v="1" type="plugin" value="<owner>@<bundle>" />` or an agreed equivalent) on `--help` and on error paths, pointing to the CLI's own companion skill bundle.
-- [ ] Confirm whether this hint-tag format is a documented Claude Code convention (vs. Stripe-specific) before standardizing on it — check if other CLIs use a different/competing convention (Vercel's `<claude-code-hint>`-adjacent onboarding via `vercel mcp`/`vercel skills`/`agent init` is a different mechanism worth comparing against).
+- [ ] **Add a bonus item to category 15 (Agent onboarding package)** in `agent-ready-cli-checklist-v2.md`, e.g.: *"Bonus: when it detects Claude Code (`CLAUDECODE` or `CLAUDE_CODE_CHILD_SESSION` set), the CLI recommends its official-marketplace plugin with a `<claude-code-hint />` line on stderr."* Apply it identically across all 5 bundled copies and run `scripts/check-drift.sh` after.
+- [ ] **Define "bonus" in `SCORING.md` and the checklist's How to score.** The model has no bonus today: every box is passed ÷ scored. Proposal: a bonus box counts in the numerator and the denominator when it passes, and leaves the denominator when it doesn't. It can raise a score and never lower one, is never a gate, and needs no N/A (a CLI with no official-marketplace plugin just doesn't get it). Re-score the 10 under the new rule: Stripe gains the point, nobody loses one.
+- [ ] **`agent-ready-cli-audit`:** check for it in Step 0/1. Run the CLI with `CLAUDECODE=1`, **send stderr to a file and count the tag with grep.** Inside Claude Code the line is stripped from Bash output before the model sees it, so an auditor reading normal output will never see it. Also report whether the vendor has a plugin in an official marketplace, as an observation either way.
+- [ ] **`agent-ready-cli-spec` / `agent-ready-cli-build`:** when the product has, or plans, a plugin in an official marketplace, recommend emitting the hint: stderr, its own line, gated on the env vars, on every invocation (Claude Code prompts once per plugin). Point to the docs' Node, Python, Go and shell snippets. Never emit it ungated.
+- [x] ~~Confirm whether this hint-tag format is a documented Claude Code convention~~: yes, documented (link above). Closed Oct 11, 2026.
 
-*Captured from the Jul 9, 2026 top-10 CLI re-audit session (live-installing Stripe/Terraform/Confluent/AWS CLIs for real, per Emmanuel's request). Full context: `01-Business/reference/top-10-cli-audit-rerun-2026-07-09.md` in the Agent vault.*
+*Captured from the Jul 9, 2026 top-10 CLI re-audit session; corrected and re-scoped Oct 11, 2026 (Emmanuel: include the behavior in the checklist as a bonus). Re-audit results: `01-Business/reference/top-10-cli-reaudit-v060-2026-07-09.md` in the Agent vault.*
 
 ---
 
