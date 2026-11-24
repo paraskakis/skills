@@ -35,7 +35,7 @@ Each skill bundles working examples of the files it needs in `references/example
 
 For the full experience (automated linting + local preview):
 
-- **vacuum** — enables automated linting and scoring. Runs locally, no account or key. Install: `brew install --cask daveshanley/vacuum/vacuum` (other options at [quobix.com/vacuum/installing](https://quobix.com/vacuum/installing/)).
+- **vacuum** — enables automated linting and scoring. Runs locally, no account or key. Install: `brew install --cask daveshanley/vacuum/vacuum` (other options at [quobix.com/vacuum/installing](https://quobix.com/vacuum/installing/)). If it is missing, the skills offer to install it at the start of a run.
 - **Node.js** — for Swagger UI preview via `npx http-server`.
 - **python3** — used to read vacuum's JSON report.
 

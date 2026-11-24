@@ -19,7 +19,7 @@ Triggering is defined in the frontmatter description. In scope: turning stories 
 
 The core skill (spec generation) works with no extra tools. For the full experience:
 
-- **vacuum** — enables automated linting and scoring. Runs locally, no account or key. Install: `brew install --cask daveshanley/vacuum/vacuum` (other options at https://quobix.com/vacuum/installing/).
+- **vacuum** — enables automated linting and scoring. Runs locally, no account or key. Install: `brew install --cask daveshanley/vacuum/vacuum` (other options at https://quobix.com/vacuum/installing/). If it is missing, the skill offers to install it at the start of a run.
 - **Node.js** — enables local Swagger UI preview via `npx http-server`.
 - **python3** — used to read vacuum's JSON report.
 
@@ -43,6 +43,36 @@ See `references/examples/` for a complete set of inputs (conference scheduling A
 - `conference-domain.md` — domain model
 - `API-standards.md` — API standards
 - `OpenAPI-best-practices.md` — OpenAPI best practices
+
+## Before You Start: Linter Check
+
+The lint step (Step 5) needs [vacuum](https://quobix.com/vacuum/) on the user's machine. Settle this now, before any other work, so the run is not interrupted later.
+
+Run:
+
+```bash
+command -v vacuum || echo "vacuum-not-found"; test -f ~/.config/design-api/skip-vacuum && echo "never-ask"; true
+```
+
+- **The output is a path to vacuum** — say nothing and go to Step 1.
+- **The output has `vacuum-not-found` and `never-ask`** — the user already chose not to be asked. Do not ask. Go to Step 1; the lint step will be skipped.
+- **The output has `vacuum-not-found` only** — ask the user once. Use this question and exactly these three options:
+
+  "vacuum, the linter I use to score the spec, isn't installed on this machine. What would you like to do?"
+
+  1. **Install vacuum now** — a free, open-source OpenAPI linter that runs on your machine. No account, nothing uploaded. It lets me score your spec out of 100 and use the score to guide fixes.
+  2. **Not now** — skip scoring for this run. I'll ask again next time.
+  3. **Never ask again** — skip scoring from now on.
+
+If you cannot ask the user (a non-interactive run), treat it as **Not now**.
+
+**Install vacuum now.** If Homebrew is available (`command -v brew`), run `brew install --cask daveshanley/vacuum/vacuum`. If it is not, show the user the options at https://quobix.com/vacuum/installing/ and run only a command they confirm. Then check `command -v vacuum` again. If vacuum is still not found, tell the user the install did not work, and continue without linting.
+
+**Not now.** Change nothing. Continue; the lint step will be skipped.
+
+**Never ask again.** Run `mkdir -p ~/.config/design-api && touch ~/.config/design-api/skip-vacuum`. Tell the user: "Done. I won't ask again in any of the API design skills. To be asked again, delete `~/.config/design-api/skip-vacuum`." This choice also applies to the other API design skills, which share the same marker file. Continue; the lint step will be skipped.
+
+Whatever the answer, the rest of the skill runs the same way and still produces a complete spec.
 
 ## Step 1: Read All Inputs
 
@@ -125,7 +155,7 @@ Check for it:
 command -v vacuum
 ```
 
-**If vacuum is not installed**, tell the user: "vacuum not found. Skipping automated linting. To enable it, install vacuum (`brew install --cask daveshanley/vacuum/vacuum` with Homebrew; other options at https://quobix.com/vacuum/installing/) and run the lint step again." Then skip to Step 6. Do not install it without the user's say-so.
+**If vacuum is not installed**, the user already made their choice in "Before You Start". Do not ask again and do not install anything. Skip to Step 6.
 
 **If vacuum is installed**, write the report to a file, then parse it.
 
@@ -193,11 +223,15 @@ Show the user:
 **Score:** [Overall] / 100 (vacuum, recommended ruleset)
   - [each category below 100: name and score]
 
-**Report (optional):** For a shareable local HTML report, run `vacuum html-report [spec.json] [vacuum-report.html]`. Offer it; do not generate it unprompted.
+**Report (optional):** For a shareable local HTML report, run `vacuum html-report [spec.json] [vacuum-report.html]`.
 
 **Issues ignored (by design):**
 - [list any intentional deviations the user approved]
 ```
+
+Offer the HTML report; do not generate it unprompted.
+
+If linting was skipped, write `**Score:** not scored (vacuum not installed)` and leave out the category lines, the Report line and the "Issues ignored" section.
 
 Then ask: **"Want to preview this in Swagger UI?"**
 

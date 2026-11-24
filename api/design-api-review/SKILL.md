@@ -3,7 +3,7 @@ name: design-api-review
 description: Review an OpenAPI specification against API standards and OpenAPI best practices. Point it at a spec — a path on disk, a URL, or a GitHub repo — and it reviews against its own bundled standards and best practices unless you supply yours. Produces a divergence report (verdict per standards section, each finding citing the rule it breaks) for the user to review; fixes are applied only after the user decides. Use when user says "/design-api-review" or asks to review, audit, or check an OpenAPI spec against standards. The spec is the only required input. Does not generate a spec (that is `design-api-spec`) and does not review implementation code.
 license: MIT
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -34,6 +34,36 @@ Identify any supplied file by its `# Title` heading or content, not by filename.
 ### Bundled Rulesets
 
 `references/examples/` holds the two default rulesets: `API-standards.md` and `OpenAPI-best-practices.md`. **No sample spec is bundled** — the spec always comes from the user.
+
+## Before You Start: Linter Check
+
+The lint step (Step 5) needs [vacuum](https://quobix.com/vacuum/) on the user's machine. Settle this now, before any other work, so the run is not interrupted later.
+
+Run:
+
+```bash
+command -v vacuum || echo "vacuum-not-found"; test -f ~/.config/design-api/skip-vacuum && echo "never-ask"; true
+```
+
+- **The output is a path to vacuum** — say nothing and go to Step 1.
+- **The output has `vacuum-not-found` and `never-ask`** — the user already chose not to be asked. Do not ask. Go to Step 1; the lint step will be skipped.
+- **The output has `vacuum-not-found` only** — ask the user once. Use this question and exactly these three options:
+
+  "vacuum, the linter I use to score the spec, isn't installed on this machine. What would you like to do?"
+
+  1. **Install vacuum now** — a free, open-source OpenAPI linter that runs on your machine. No account, nothing uploaded. It lets me score your spec out of 100 and use the score to guide fixes.
+  2. **Not now** — skip scoring for this run. I'll ask again next time.
+  3. **Never ask again** — skip scoring from now on.
+
+If you cannot ask the user (a non-interactive run), treat it as **Not now**.
+
+**Install vacuum now.** If Homebrew is available (`command -v brew`), run `brew install --cask daveshanley/vacuum/vacuum`. If it is not, show the user the options at https://quobix.com/vacuum/installing/ and run only a command they confirm. Then check `command -v vacuum` again. If vacuum is still not found, tell the user the install did not work, and continue without linting.
+
+**Not now.** Change nothing. Continue; the lint step will be skipped.
+
+**Never ask again.** Run `mkdir -p ~/.config/design-api && touch ~/.config/design-api/skip-vacuum`. Tell the user: "Done. I won't ask again in any of the API design skills. To be asked again, delete `~/.config/design-api/skip-vacuum`." This choice also applies to the other API design skills, which share the same marker file. Continue; the lint step will be skipped.
+
+Whatever the answer, the rest of the skill runs the same way and still produces a complete spec.
 
 ## Step 1: Read Everything
 
@@ -97,10 +127,43 @@ Order findings by severity: security and error-contract issues first, naming/cos
 
 ## Step 5: Fix (only after user review)
 
-When the user says which findings to fix, apply them to the spec, then:
-1. Re-validate JSON and `$ref` integrity.
-2. If `vacuum` is installed, re-lint with vacuum (see the `design-api-spec` skill, "Lint with vacuum") and confirm the score did not regress.
-3. Show a diff-level summary of what changed.
+When the user says which findings to fix:
+
+1. **Record the starting score.** Check `command -v vacuum`. If vacuum is installed, lint the spec as it is now and note the score, using the commands under "Lint commands" below. If vacuum is not installed, the user already made their choice in "Before You Start". Do not ask again and do not install anything. Skip the scoring in this step.
+2. Apply the fixes to the spec.
+3. Re-validate JSON and `$ref` integrity.
+4. If vacuum is installed, lint again the same way and confirm the score did not regress. Report both scores (before → after). If it dropped, say which new issues appeared.
+5. Show a diff-level summary of what changed.
+
+### Lint commands
+
+**If vacuum is installed**, write the report to a file, then parse it.
+
+```bash
+vacuum report --no-update-check -q -o [/absolute/path/to/spec.json] > /tmp/vacuum-report.json
+```
+
+Then parse the saved report:
+
+```bash
+python3 -c "
+import json
+data = json.load(open('/tmp/vacuum-report.json'))
+stats = data.get('statistics')
+issues = (data.get('resultSet') or {}).get('results') or []
+if stats:
+    print(f'Score: {stats[\"overallScore\"]}/100')
+    for c in stats.get('categoryStatistics') or []:
+        print(f'  {c[\"categoryName\"]}: {c[\"score\"]} ({c[\"numIssues\"]} issues)')
+else:
+    print('vacuum could not read the document as OpenAPI. Issues are listed below.')
+print(f'Total issues: {len(issues)}')
+for i, issue in enumerate(issues, 1):
+    line = ((issue.get('range') or {}).get('start') or {}).get('line')
+    print(f'{i}. [{issue.get(\"ruleSeverity\")}] {issue.get(\"ruleId\")} (line {line}) {issue.get(\"path\")}')
+    print(f'   {issue.get(\"message\")}')
+"
+```
 
 ## Key Principles
 

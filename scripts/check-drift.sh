@@ -65,6 +65,15 @@ compare() {
 echo "Checking duplicated blocks across the API design skills..."
 echo
 
+compare "linter check"        design-api design-api-spec \
+  '^## Before You Start: Linter Check' '^(---|## Step [0-9]+: Read)'
+
+compare "linter check (review)" design-api-spec design-api-review \
+  '^## Before You Start: Linter Check' '^(---|## Step [0-9]+: Read)'
+
+compare "vacuum commands"     design-api-spec design-api-review \
+  '^[*][*]If vacuum is installed' '^(Use the issue list to drive all fixes below|#+ )'
+
 compare "simple story format" design-api design-api-stories \
   '^### Simple Story Format' '^### Detailed Story Format'
 
