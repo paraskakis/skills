@@ -29,6 +29,31 @@
 - [ ] **The rulesets are written in authoring voice.** `OpenAPI-best-practices.md` opens with `## Your Role:` / "You are an experienced API Architect." (line 4) and `## Outcome:` / "Design an API using the OpenAPI specification version 3.1.0" (line 7). That's a *prompt*, not a *ruleset* — right when the file was fed to a model to build a spec, wrong now that four skills with four different jobs consume it. A review skill is not designing; a stories skill is not writing OpenAPI. Proposal: lift the role/outcome preamble out of the ruleset and into whichever skill needs it, leaving the file as voice-neutral rules any consumer can apply. This is also what makes the version bug above possible. (`API-standards.md` is already close — no role preamble, no version pin.)
 - [ ] **`check-drift.sh` covers none of the bundled rulesets.** The skills repo carries 4 × `API-standards.md` and 3 × `OpenAPI-best-practices.md` (one per skill that needs them). Identical as of Jul 9, 2026, but the guard only compares SKILL.md blocks — these seven files have no protection at all, which is exactly the hole that let the story rules drift. Each skill genuinely needs its own copy (skills install as standalone directories), so the copies stay; extend the guard to assert they match. Cheap, and independent of wherever the canonical file eventually lives.
 
+## Linter Rules File (BIG — needs a design decision first)
+- [ ] **Ship a vacuum rules file with the skills, and let the user bring their own.** Today the score comes from vacuum's built-in "recommended" ruleset (56 rules on vacuum 0.42.3). That is the decided behaviour for now. Open questions, in order:
+  - **How does a rules file combine with the standards file, if at all?** The standards file is the law for the model (Key Principle 1); a linter ruleset is a second law for the score. Options: one generated from the other; a hand-kept ruleset that mirrors the standards; or keep them separate and say which wins. Same question as "Validation & Linting in the Review Skill" above.
+  - **Ask the user for their own rules file.** At the start, alongside the other inputs: "point me at your vacuum or Spectral ruleset, or I'll use the built-in one". vacuum takes `-r <ruleset>` and reads Spectral rulesets.
+  - **Which built-in level is the default?** The recommended set is lenient on security (a no-auth API scores Security 100); hard mode (`-z`) scored the flight example 10/100. A bundled ruleset could sit between the two.
+  - Whatever ships must be bundled per skill and covered by `check-drift.sh`, like the standards files.
+
+## Findings from the Nov 23 2026 literal test run of `design-api-spec`
+*(An agent followed the skill word for word on a machine with no vacuum, no Homebrew, no Node. The run completed. These are the places the instructions were unclear. None is about vacuum; none is fixed yet.)*
+- [ ] **Step 3 (Validate JSON) has no method.** No command is given, and it says "before writing the file" while Step 4 says "Write directly".
+- [ ] **Key Principle 1 can contradict the stories.** "Every story becomes one or more operations. No more, no less" fails when two stories share one operation (flight stories 1.1 and 2.1 both map to `GET /flights`).
+- [ ] **Property names cannot be "exactly as written"** when the domain file uses Title Case with spaces and the standards require camelCase. Say that names are converted, and whether a misspelling in the domain file is carried over or flagged.
+- [ ] **"Do not add properties that aren't in the domain" conflicts with required extras:** collection wrappers and their pagination fields (which fields, for offset/limit?), `ProblemDetails`, composite ids.
+- [ ] **`security` for a no-auth API:** omit the key, or write `"security": []`?
+- [ ] **`example` vs `examples`:** Content Rules require `example`; the gotchas accept either.
+- [ ] **Info and server values are in no input** (contact, license, server URL, version). Say whether to ask or use placeholders, and give the report a place to flag invented values.
+- [ ] **"Ask the user" lines inside the input files** (best practices, Outcome 2): do they fire?
+- [ ] **Extra input files:** what to do with a fifth file, such as a research file.
+- [ ] **Single-use parameters:** `components/parameters` or inline?
+- [ ] **Preview question and Node:** the skill offers the preview before checking Node, and gives no check command.
+- [ ] **Frontmatter says "iterates to 100/100" unconditionally,** though linting is optional.
+- [ ] **Fixed report path `/tmp/vacuum-report.json`:** two runs at once on one machine overwrite each other.
+- [ ] **No-Homebrew install path** assumes the agent can read the vacuum install page.
+- [ ] **Not yet tested:** the "Install vacuum now" path; full runs of `design-api` and `design-api-review`; Windows.
+
 ## Additional Linters / Scanners
 - [ ] Jentic scanner
 - [ ] 42Crunch scanner
