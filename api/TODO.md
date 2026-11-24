@@ -35,6 +35,8 @@
   - **Ask the user for their own rules file.** At the start, alongside the other inputs: "point me at your vacuum or Spectral ruleset, or I'll use the built-in one". vacuum takes `-r <ruleset>` and reads Spectral rulesets.
   - **Which built-in level is the default?** The recommended set is lenient on security (a no-auth API scores Security 100); hard mode (`-z`) scored the flight example 10/100. A bundled ruleset could sit between the two.
   - Whatever ships must be bundled per skill and covered by `check-drift.sh`, like the standards files.
+  - **Rules = standards, by definition.** If the rules file encodes the same rules as the standards file, a spec that follows the standards must pass: 100 means "meets the standards", nothing else. Any rule that fails a standards-compliant spec is a bug in the rules file (or a gap in the standards). That is the test for whatever we ship.
+  - **Hard mode is worth a look.** On the bundled conference example the built-in rules gave 100/100 on the first pass, so the fix loop never ran; `vacuum lint -z` gave the same spec 10/100 (35 errors, mostly OWASP string/integer limits, plus 8 missing-401 warnings that conflict with the standards for a public API). Decide which hard-mode rules belong in the standards, and so in the rules file.
 
 ## Findings from the Nov 23 2026 literal test run of `design-api-spec`
 *(An agent followed the skill word for word on a machine with no vacuum, no Homebrew, no Node. The run completed. These are the places the instructions were unclear. None is about vacuum; none is fixed yet.)*
@@ -53,6 +55,15 @@
 - [ ] **Fixed report path `/tmp/vacuum-report.json`:** two runs at once on one machine overwrite each other.
 - [ ] **No-Homebrew install path** assumes the agent can read the vacuum install page.
 - [ ] **Not yet tested:** the "Install vacuum now" path; full runs of `design-api` and `design-api-review`; Windows.
+
+*(Second run, same night: the bundled conference example with vacuum 0.42.3 installed. 100/100 on the first pass, every command ran. More wording issues:)*
+- [ ] **Domain names vs standards casing.** The skill says use "the exact property names from the domain file"; the bundled standards require camelCase, lowercase `id` and lowercase enum values, and the conference domain has `ID`, `TrackID`, `SpeakerIDs`, enum `Keynote, Talk, Workshop, Panel`. Say which wins and tell the user when names are converted.
+- [ ] **Standard attributes.** "Do not add properties that aren't in the domain" vs the standards' "every resource carries `id`, `createdAt`, `updatedAt`". Today the skill line wins silently.
+- [ ] **Timestamp names.** Standards: "Timestamps end in `At`". Conference domain: `StartTime`, `EndTime`. Same silent conflict.
+- [ ] **The skill's own examples contradict its bundled standards.** The skill text mentions `cursor` pagination and `InstrumentCollection` (from a different API); the bundled standards say "Do not use cursor or page-number pagination".
+- [ ] **400 on collections:** does pagination count as a "filter"?
+- [ ] **Report template with nothing to list:** wording for "no category below 100" and "no ignored issues".
+- [ ] **Standards items the skill gives no rule for:** comma-separated values, `sort`/`order`, `fields`, `expand`, 405, 406.
 
 ## Additional Linters / Scanners
 - [ ] Jentic scanner
