@@ -1,15 +1,15 @@
 ---
 name: design-api-spec
-description: Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and OpenAPI best practices. Lints with RateMyOpenAPI and iterates to 100/100. Use when user says "/design-api-spec" or asks to generate an OpenAPI spec from stories. Does not write the stories (that is `design-api-stories`) and does not review an existing spec (that is `design-api-review`).
+description: Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and OpenAPI best practices. Lints with vacuum and iterates to 100/100. Use when user says "/design-api-spec" or asks to generate an OpenAPI spec from stories. Does not write the stories (that is `design-api-stories`) and does not review an existing spec (that is `design-api-review`).
 license: MIT
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
 # Design API Spec
 
-Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and an OpenAPI best practices file. Then lint it with RateMyOpenAPI and fix issues. This is part of Emmanuel Paraskakis's method for designing APIs with LLMs. Stories can come from the companion `design-api-stories` skill or be written by hand — either way, this skill takes stories + domain + standards + OpenAPI best practices and produces a validated spec.
+Generate an OpenAPI 3.1.0 specification from API design stories, a domain model, API standards, and an OpenAPI best practices file. Then lint it with vacuum and fix issues. This is part of Emmanuel Paraskakis's method for designing APIs with LLMs. Stories can come from the companion `design-api-stories` skill or be written by hand — either way, this skill takes stories + domain + standards + OpenAPI best practices and produces a validated spec.
 
 ## Scope and Routing
 
@@ -19,9 +19,9 @@ Triggering is defined in the frontmatter description. In scope: turning stories 
 
 The core skill (spec generation) works with no extra tools. For the full experience:
 
-- **RateMyOpenAPI API key** — enables automated linting and scoring. Free signup at [api.ratemyopenapi.com/docs](https://api.ratemyopenapi.com/docs). Set as `RMOA_API_KEY` env var.
+- **vacuum** — enables automated linting and scoring. Runs locally, no account or key. Install: `brew install --cask daveshanley/vacuum/vacuum` (other options at https://quobix.com/vacuum/installing/).
 - **Node.js** — enables local Swagger UI preview via `npx http-server`.
-- **curl + python3** — used for the RMOA API call. Almost always pre-installed.
+- **python3** — used to read vacuum's JSON report.
 
 Without these, the skill still generates a complete OpenAPI spec — it just skips linting and local preview.
 
@@ -115,44 +115,43 @@ Save as JSON to a location the user specifies, or ask where they'd like it saved
 
 **Write directly — do not check for or read existing files first.** If the Write tool fails due to a name conflict, append a number and try again.
 
-## Step 5: Lint with RateMyOpenAPI (optional)
+## Step 5: Lint with vacuum (optional)
 
-This step requires an API key from [RateMyOpenAPI](https://ratemyopenapi.com). Sign up for a free account at [api.ratemyopenapi.com/docs](https://api.ratemyopenapi.com/docs) — your API key appears in the Authentication section once logged in. Set it as the environment variable `RMOA_API_KEY` (or any name you prefer — just update the curl command below to match).
+This step uses [vacuum](https://quobix.com/vacuum/), a free open-source OpenAPI linter that runs on the user's machine. Nothing is uploaded, and there is no account or API key.
 
-**If `RMOA_API_KEY` is not set**, try sourcing the user's shell profile first (`source ~/.zshrc`, `source ~/.bashrc`, or equivalent) — the key may be defined there but not yet loaded in the current session. If still not set, tell the user: "No RMOA API key found. Skipping automated linting. You can get a free key at ratemyopenapi.com and set `RMOA_API_KEY` to enable it." Then skip to Step 6.
-
-**If `RMOA_API_KEY` is set**, upload the spec and get scores + full issue list.
-
-Write the response to a file first (don't pipe curl into `python3 -c`). RMOA responses can contain literal control characters inside JSON strings, which Python's strict JSON parser rejects when reading from stdin. Saving to a file and parsing with `strict=False` avoids both that and shell byte-mangling.
+Check for it:
 
 ```bash
-curl -s -X POST \
-  -H "Authorization: Bearer $RMOA_API_KEY" \
-  -F "apiFile=@[/absolute/path/to/spec.json]" \
-  -o /tmp/rmoa-response.json \
-  -w "HTTP:%{http_code} SIZE:%{size_download}\n" \
-  "https://api.ratemyopenapi.com/sync-report"
+command -v vacuum
 ```
 
-Check that the curl call returned `HTTP:200` and a non-zero size before parsing. If not, RMOA itself is the problem — retry or skip linting.
+**If vacuum is not installed**, tell the user: "vacuum not found. Skipping automated linting. To enable it, install vacuum (`brew install --cask daveshanley/vacuum/vacuum` with Homebrew; other options at https://quobix.com/vacuum/installing/) and run the lint step again." Then skip to Step 6. Do not install it without the user's say-so.
 
-Then parse the saved response:
+**If vacuum is installed**, write the report to a file, then parse it.
+
+```bash
+vacuum report --no-update-check -q -o [/absolute/path/to/spec.json] > /tmp/vacuum-report.json
+```
+
+Then parse the saved report:
 
 ```bash
 python3 -c "
 import json
-data = json.loads(open('/tmp/rmoa-response.json').read(), strict=False)
-r = data['results']['simpleReport']
-issues = data['results']['fullReport']['issues']
-print(f'Score: {r[\"score\"]} | Docs: {r[\"docsScore\"]} | Completeness: {r[\"completenessScore\"]} | SDK: {r[\"sdkGenerationScore\"]} | Security: {r[\"securityScore\"]}')
-print(f'Report: https://ratemyopenapi.com/report/{r.get(\"reportId\", \"\")}')
+data = json.load(open('/tmp/vacuum-report.json'))
+stats = data.get('statistics')
+issues = (data.get('resultSet') or {}).get('results') or []
+if stats:
+    print(f'Score: {stats[\"overallScore\"]}/100')
+    for c in stats.get('categoryStatistics') or []:
+        print(f'  {c[\"categoryName\"]}: {c[\"score\"]} ({c[\"numIssues\"]} issues)')
+else:
+    print('vacuum could not read the document as OpenAPI. Issues are listed below.')
 print(f'Total issues: {len(issues)}')
 for i, issue in enumerate(issues, 1):
-    path = ' > '.join(str(p) for p in issue.get('path', []))
-    print(f'{i}. [{\"ERROR\" if issue[\"severity\"]==0 else \"WARN\"}] {issue[\"code\"]}')
-    print(f'   {issue[\"message\"]}')
-    print(f'   Path: {path}')
-    print()
+    line = ((issue.get('range') or {}).get('start') or {}).get('line')
+    print(f'{i}. [{issue.get(\"ruleSeverity\")}] {issue.get(\"ruleId\")} (line {line}) {issue.get(\"path\")}')
+    print(f'   {issue.get(\"message\")}')
 "
 ```
 
@@ -160,22 +159,15 @@ Use the issue list to drive all fixes below.
 
 ### Interpreting Results
 
-Scores four categories (0-100 each):
-- **Docs** — Descriptions, summaries, examples
-- **Completeness** — Required fields, response codes, schemas
-- **SDK Generation** — operationIds, no inline schemas, proper refs
-- **Security** — Auth schemes, 401/403 responses
+vacuum gives one overall score (0-100) plus nine categories, each 0-100: Contract Information, Operations, Tags, Schemas, Validation, Descriptions, Security, Examples, OWASP. It uses vacuum's default "recommended" ruleset.
 
-**Target: 100/100 on all categories.**
+**Target: 100/100 overall.**
 
 ### Handling Issues
 
 1. **Auto-fix** anything that's clearly a formatting or completeness issue (missing description, missing example, missing error response).
 
-2. **Ask the user** about issues that involve design decisions. Common examples:
-   - **No authentication / missing 401**: If the API intentionally has no auth (e.g., a training exercise), tell the user RMOA flagged it and ask if they want to ignore it or add auth.
-   - **Missing error codes**: If RMOA expects 401/403 but the stories don't include auth, ask.
-   - **Naming conventions**: If RMOA flags a naming pattern that conflicts with the standards file, the standards file wins. Tell the user.
+2. **Ask the user** about issues that involve design decisions. If a rule conflicts with the standards file, the standards file wins. Tell the user.
 
 3. **Re-run after fixes.** Keep iterating until either:
    - Score is 100/100, or
@@ -183,11 +175,12 @@ Scores four categories (0-100 each):
 
 ### Common Gotchas
 
-- **No-auth APIs score ~65 on Security.** RMOA flags 8+ warnings about missing 401/403. If the API intentionally has no auth, these are expected — confirm with the user and move on.
-- **`nullable` keyword.** OpenAPI 3.1.0 dropped `nullable`. Use `"type": ["string", "null"]` instead. RMOA will flag this.
-- **Missing descriptions/examples.** The most common deductions. Every operation, parameter, schema property, and response needs both. Don't skip headers either.
-- **Orphaned components.** RMOA flags schemas defined in `components` but never `$ref`'d. Remove them or wire them up.
-- **Inline schemas.** Any schema defined directly in a path (not via `$ref`) hurts the SDK Generation score. Extract to `components/schemas`.
+- **Errors sink the score.** One `oas3-schema` error took a 98 to 10 in testing. Fix errors first, then warnings, then info.
+- **`nullable` keyword.** OpenAPI 3.1.0 dropped `nullable`; use `"type": ["string", "null"]`. vacuum reports it as an `oas3-schema` error.
+- **Missing examples** (`oas3-missing-example`). A common deduction: every media type and schema property needs an `example` or `examples`.
+- **Duplicate descriptions** (`description-duplication`, info level). Two fields with identical description text; make each one specific.
+- **Orphaned components** (`oas3-unused-component`). Schemas in `components` that are never `$ref`'d: remove them or wire them up.
+- **The default ruleset is lenient on security.** A no-auth API can still score Security 100. For a stricter pass run `vacuum lint -z [spec]` (hard mode: every rule, including OWASP). Expect many findings; treat that list as things to review with the user, not a score to chase.
 
 ## Step 6: Report
 
@@ -197,13 +190,10 @@ Show the user:
 ## OpenAPI Spec Complete
 
 **File:** [path]
-**Score:** [Overall] / 100
-  - Docs: [score]
-  - Completeness: [score]
-  - SDK Generation: [score]
-  - Security: [score]
+**Score:** [Overall] / 100 (vacuum, recommended ruleset)
+  - [each category below 100: name and score]
 
-**Report:** [RMOA report URL]
+**Report (optional):** For a shareable local HTML report, run `vacuum html-report [spec.json] [vacuum-report.html]`. Offer it; do not generate it unprompted.
 
 **Issues ignored (by design):**
 - [list any intentional deviations the user approved]
@@ -268,6 +258,6 @@ If yes:
 
 4. **The best practices govern OpenAPI quality.** DRY, descriptions, examples, component extraction — best practices file wins over shortcuts.
 
-5. **Lint is validation, not gospel.** RMOA catches real issues but also flags intentional design choices. The user decides what to fix and what to ignore.
+5. **Lint is validation, not gospel.** vacuum catches real issues but also flags intentional design choices. The user decides what to fix and what to ignore.
 
-6. **JSON output only.** OpenAPI in JSON, not YAML. This matches RMOA's expected input and avoids YAML formatting issues with LLM output.
+6. **JSON output only.** OpenAPI in JSON, not YAML. This avoids YAML formatting issues with LLM output.

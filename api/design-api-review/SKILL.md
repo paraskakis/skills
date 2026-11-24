@@ -3,7 +3,7 @@ name: design-api-review
 description: Review an OpenAPI specification against API standards and OpenAPI best practices. Point it at a spec — a path on disk, a URL, or a GitHub repo — and it reviews against its own bundled standards and best practices unless you supply yours. Produces a divergence report (verdict per standards section, each finding citing the rule it breaks) for the user to review; fixes are applied only after the user decides. Use when user says "/design-api-review" or asks to review, audit, or check an OpenAPI spec against standards. The spec is the only required input. Does not generate a spec (that is `design-api-spec`) and does not review implementation code.
 license: MIT
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   author: "Emmanuel Paraskakis / Level 250"
 ---
 
@@ -99,7 +99,7 @@ Order findings by severity: security and error-contract issues first, naming/cos
 
 When the user says which findings to fix, apply them to the spec, then:
 1. Re-validate JSON and `$ref` integrity.
-2. If `RMOA_API_KEY` is available, re-lint with RateMyOpenAPI (see the `design-api-spec` skill, "Lint with RateMyOpenAPI") and confirm the score did not regress.
+2. If `vacuum` is installed, re-lint with vacuum (see the `design-api-spec` skill, "Lint with vacuum") and confirm the score did not regress.
 3. Show a diff-level summary of what changed.
 
 ## Key Principles

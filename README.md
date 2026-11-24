@@ -35,9 +35,9 @@ Each skill bundles working examples of the files it needs in `references/example
 
 For the full experience (automated linting + local preview):
 
-- **RateMyOpenAPI API key** (free) — [api.ratemyopenapi.com/docs](https://api.ratemyopenapi.com/docs). Set as `RMOA_API_KEY` env var.
+- **vacuum** — enables automated linting and scoring. Runs locally, no account or key. Install: `brew install --cask daveshanley/vacuum/vacuum` (other options at [quobix.com/vacuum/installing](https://quobix.com/vacuum/installing/)).
 - **Node.js** — for Swagger UI preview via `npx http-server`.
-- **curl + python3** — for the RMOA API call (usually pre-installed).
+- **python3** — used to read vacuum's JSON report.
 
 Without these, the skills still generate a complete OpenAPI spec.
 

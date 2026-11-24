@@ -18,7 +18,7 @@
   - **Parse validation** — is the input even well-formed JSON/YAML? Today a malformed spec reaches the model, which will try to review it anyway.
   - **OpenAPI structural validation** — does it validate against the OpenAPI meta-schema for its declared version? A structurally invalid spec should fail fast with a parse error, not produce a standards-compliance verdict.
   Neither is a judgement call, so neither belongs to the model. Open question: do these run always, or only when the spec came from a URL/repo rather than a trusted local path?
-- [ ] **Do we wire a linter into the review, or stay model-vs-ruleset?** Candidates: RMOA (already used by `design-api-spec` Step 5), Spectral, Vacuum, Jentic, 42Crunch. Arguments both ways, unresolved:
+- [ ] **Do we wire a linter into the review, or stay model-vs-ruleset?** Candidates: vacuum (the lint step in `design-api-spec` and `design-api` since Nov 2026; RMOA shut down Nov 21 2026), Spectral, Jentic, 42Crunch. Arguments both ways, unresolved:
   - *For:* linters are deterministic, fast, and catch the mechanical class of findings (missing descriptions, orphaned components, inline schemas) that currently consume model attention. The model could then spend its budget on the findings only it can make — semantic lies like a documented `?expand=project` with no property to receive it (observed Jul 9, 2026, Todo API review).
   - *Against:* a linter enforces *its* rules, not the user's standards file. Key Principle 1 says the rulesets in play are the law. A linter that disagrees with the standards file introduces a second law, and we'd have to say which wins — the `design-api-spec` skill already has this problem and resolves it "the standards file wins, tell the user."
   - Decide the *layering* first: parse → structural validate → linter (mechanical) → model (semantic + standards). Then decide which linter, if any.
@@ -33,7 +33,7 @@
 - [ ] Jentic scanner
 - [ ] 42Crunch scanner
 - [ ] OpenAPIDoctor — talk to Dave about making it an API
-- [ ] Vacuum (Dave Shanley) — fast linting
+- [x] Vacuum (Dave Shanley) — fast linting (wired into design-api-spec / design-api, Nov 2026)
 - [ ] Spectral linting
 
 ## Additional Previews
@@ -41,4 +41,4 @@
 - [ ] Self-contained Swagger UI preview. The current preview step (`design-api`, `design-api-spec`) writes an HTML file that `fetch()`es the spec, so it needs `npx http-server` and a cleanup step. Embedding the spec directly in the HTML would remove the server, the port juggling, and the teardown. In Cowork this renders as an artifact with an "Open in Safari" button — an instant visual payoff at the end of the flow. (Discovered Mar 16, 2026 during Cowork testing.)
 
 ## Relationships
-- [ ] Talk to Martyn about improvements to RMOA
+- [ ] Talk to Martyn about improvements to RMOA (moot: RMOA shut down Nov 21 2026)

@@ -77,8 +77,8 @@ compare "validate json"       design-api design-api-spec \
 compare "save the spec"       design-api design-api-spec \
   '^## Step [0-9]+: Save' '^## Step [0-9]+: Lint'
 
-compare "rmoa lint"           design-api design-api-spec \
-  '^## Step [0-9]+: Lint with RateMyOpenAPI' '^## Step [0-9]+: Report'
+compare "vacuum lint"         design-api design-api-spec \
+  '^## Step [0-9]+: Lint with vacuum' '^## Step [0-9]+: Report'
 
 compare "report + preview"    design-api design-api-spec \
   '^## Step [0-9]+: Report' '^(#+ Key Principles|---)$'
